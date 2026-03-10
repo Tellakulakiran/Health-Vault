@@ -5,8 +5,7 @@ from core.config import settings
 engine = create_async_engine(
     settings.SQLALCHEMY_DATABASE_URI, 
     echo=False, 
-    future=True,
-    connect_args={"check_same_thread": False} # Needed for SQLite
+    future=True
 )
 
 AsyncSessionLocal = async_sessionmaker(
