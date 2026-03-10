@@ -1,0 +1,4302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>HealthVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #03070c;
+      --surface: #0a121e;
+      --surface2: #0e1929;
+      --surface3: #15253d;
+      --border: rgba(255, 255, 255, 0.08);
+      --border2: rgba(255, 255, 255, 0.15);
+      --accent: #00f2fe;
+      --accent2: #4facfe;
+      --accent3: #7000ff;
+      --danger: #ff4757;
+      --warn: #ffa502;
+      --success: #00f2a4;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --muted2: #475569;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --radius: 20px;
+      --glow-accent: rgba(0, 242, 254, 0.15);
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(0, 242, 254, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(112, 0, 255, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 50% 10%, rgba(79, 172, 254, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 10% 90%, rgba(0, 242, 164, 0.03) 0%, transparent 40%);
+      z-index: -2;
+      animation: bgPulse 15s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.015;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes bgPulse {
+      0% {
+        transform: scale(1) translate(0, 0);
+      }
+
+      50% {
+        transform: scale(1.05) translate(10px, -10px);
+      }
+
+      100% {
+        transform: scale(1.1) translate(-10px, 10px);
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 10px
+    }
+
+    /* ── AUTH ─────────────────────────────────── */
+    .auth-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-wrap::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 242, 254, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .auth-card {
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 48px;
+      width: 480px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border);
+      animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .auth-logo {
+      font-family: var(--font-head);
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.05em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .auth-sub {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .tab-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 32px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 6px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0, 242, 254, 0.25);
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(0, 242, 254, 0.1);
+    }
+
+    select.form-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 18px center;
+      padding-right: 48px;
+      cursor: pointer;
+    }
+
+    select.form-input option {
+      background-color: #0f172a;
+      color: #fff;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: var(--bg);
+      border: none;
+      border-radius: 16px;
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 10px 20px -5px rgba(0, 242, 254, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(0, 242, 254, 0.4);
+    }
+
+    /* ── APP SHELL ────────────────────────────── */
+    .app-shell {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    /* ── SIDEBAR ──────────────────────────────── */
+    .sidebar {
+      width: 280px;
+      flex-shrink: 0;
+      background: rgba(8, 14, 23, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 16px;
+    }
+
+    .sidebar-logo {
+      font-family: var(--font-head);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--accent);
+      padding: 0 16px;
+      margin-bottom: 40px;
+      letter-spacing: -0.05em;
+    }
+
+    .sidebar-logo span {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .sb-profile {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 32px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sb-profile:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--border2);
+    }
+
+    .sb-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.2s;
+      margin-bottom: 4px;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(0, 242, 254, 0.1), transparent);
+      color: var(--accent);
+      position: relative;
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      bottom: 12px;
+      width: 4px;
+      background: var(--accent);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .sidebar-foot {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .logout-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 9px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all .2s;
+    }
+
+    .logout-row:hover {
+      background: rgba(255, 77, 109, .08);
+      color: var(--danger);
+    }
+
+    /* ── MAIN ─────────────────────────────────── */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 48px;
+    }
+
+    .page-title {
+      font-family: var(--font-head);
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      margin-bottom: 8px;
+    }
+
+    .page-sub {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 40px;
+    }
+
+    .page-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    /* ── STATS ────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: default;
+    }
+
+    .stat-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .stat-glow {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      opacity: .06;
+    }
+
+    .stat-icon {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .stat-value {
+      font-family: var(--font-head);
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .stat-delta {
+      font-size: 11px;
+      margin-top: 7px;
+      font-weight: 500;
+    }
+
+    .delta-good {
+      color: var(--success);
+    }
+
+    .delta-warn {
+      color: var(--warn);
+    }
+
+    .delta-bad {
+      color: var(--danger);
+    }
+
+    /* ── CARDS ────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 32px;
+      margin-bottom: 24px;
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      border-color: var(--border2);
+    }
+
+    .card-title {
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .chart-wrap {
+      height: 200px;
+      position: relative;
+    }
+
+    /* ── BADGES ───────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-green {
+      background: rgba(34, 214, 138, .1);
+      color: var(--success);
+    }
+
+    .badge-red {
+      background: rgba(255, 77, 109, .1);
+      color: var(--danger);
+    }
+
+    .badge-amber {
+      background: rgba(255, 184, 48, .1);
+      color: var(--warn);
+    }
+
+    .badge-blue {
+      background: rgba(77, 142, 255, .1);
+      color: var(--accent2);
+    }
+
+    .badge-purple {
+      background: rgba(199, 125, 255, .1);
+      color: var(--accent3);
+    }
+
+    .badge-teal {
+      background: rgba(0, 229, 184, .1);
+      color: var(--accent);
+    }
+
+    /* ── TABLE ────────────────────────────────── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      padding: 0 0 11px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, .01);
+    }
+
+    /* ── GAUGE ────────────────────────────────── */
+    .gauge-wrap {
+      display: flex;
+      gap: 22px;
+      align-items: flex-start;
+    }
+
+    .gauge-ring {
+      width: 120px;
+      height: 120px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .gauge-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .gauge-bg {
+      fill: none;
+      stroke: var(--surface2);
+      stroke-width: 11;
+    }
+
+    .gauge-fill {
+      fill: none;
+      stroke-width: 11;
+      stroke-linecap: round;
+      transition: stroke-dasharray 1.2s ease;
+    }
+
+    .gauge-lbl {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gauge-score {
+      font-family: var(--font-head);
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .gauge-txt {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .recs-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      flex: 1;
+    }
+
+    .rec-item {
+      display: flex;
+      gap: 7px;
+      align-items: flex-start;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .rec-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .risk-level {
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    /* ── REMINDER ─────────────────────────────── */
+    .reminder-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .reminder-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 15px;
+      background: var(--surface2);
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      transition: all .2s;
+    }
+
+    .reminder-item:hover {
+      border-color: var(--border2);
+    }
+
+    .rem-time {
+      font-family: var(--font-head);
+      font-size: 18px;
+      font-weight: 700;
+      min-width: 56px;
+      color: var(--accent);
+    }
+
+    .rem-info {
+      flex: 1;
+    }
+
+    .rem-name {
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .rem-dose {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .rem-btn {
+      padding: 5px 12px;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      transition: all .2s;
+    }
+
+    .rem-taken {
+      background: rgba(34, 214, 138, .1);
+      color: var(--success);
+      border: 1px solid rgba(34, 214, 138, .18);
+    }
+
+    .rem-taken:hover {
+      background: rgba(34, 214, 138, .18);
+    }
+
+    .rem-miss {
+      background: rgba(255, 77, 109, .07);
+      color: var(--danger);
+      border: 1px solid rgba(255, 77, 109, .18);
+      margin-left: 5px;
+    }
+
+    .rem-miss:hover {
+      background: rgba(255, 77, 109, .14);
+    }
+
+    /* ── ADD PANEL ────────────────────────────── */
+    .add-panel {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .add-title {
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .btn-accent {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: var(--bg);
+      border: none;
+      border-radius: 14px;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 8px 16px -4px rgba(0, 242, 254, 0.2);
+    }
+
+    .btn-accent:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px -4px rgba(0, 242, 254, 0.35);
+    }
+
+    .btn-ghost {
+      padding: 12px 24px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border2);
+    }
+
+    .btn-danger {
+      padding: 8px 16px;
+      background: rgba(255, 71, 87, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(255, 71, 87, 0.2);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 71, 87, 0.2);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .time-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
+    }
+
+    .time-tag {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(0, 229, 184, .08);
+      border: 1px solid rgba(0, 229, 184, .18);
+      color: var(--accent);
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-size: 12px;
+    }
+
+    .time-tag button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .time-tag button:hover {
+      color: var(--danger);
+    }
+
+    /* ── UPLOAD ZONE ──────────────────────────── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 24px;
+      padding: 48px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .upload-zone:hover {
+      border-color: var(--accent);
+      background: rgba(0, 242, 254, 0.04);
+      transform: scale(1.01);
+    }
+
+    .upload-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .upload-text {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .upload-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .file-types {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .file-type-chip {
+      padding: 3px 10px;
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ── REPORT CARD ──────────────────────────── */
+    .report-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+    }
+
+    .report-card:hover {
+      border-color: var(--border2);
+      background: var(--surface2);
+    }
+
+    .report-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .report-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .report-file-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .report-name {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .report-date {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .extracted-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+    }
+
+    .extracted-item {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 9px 11px;
+    }
+
+    .ext-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 3px;
+    }
+
+    .ext-value {
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .img-preview {
+      width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: var(--surface);
+    }
+
+    /* ── TOAST ────────────────────────────────── */
+    .toast-wrap {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .toast {
+      padding: 16px 24px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 600;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      min-width: 300px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .toast-ok {
+      color: var(--success);
+      border-color: rgba(0, 242, 164, 0.3);
+    }
+
+    .toast-err {
+      color: var(--danger);
+      border-color: rgba(255, 71, 87, 0.3);
+    }
+
+    .toast-info {
+      background: linear-gradient(135deg, rgba(10, 26, 46, .95), rgba(5, 15, 30, .95));
+      border: 1px solid rgba(91, 150, 255, .3);
+      color: var(--accent2);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%) scale(0.9);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* ── EMPTY STATE ──────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 36px 20px;
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      margin-bottom: 8px;
+      opacity: .6;
+    }
+
+    .empty-text {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ── PROFILE PAGE ─────────────────────────── */
+    .profile-hero {
+      background: linear-gradient(135deg, rgba(15, 25, 40, 0.9), rgba(8, 14, 23, 0.95));
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 40px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-hero::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 245, 200, .08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .profile-hero::after {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(0, 242, 254, 0.1), transparent 70%);
+      pointer-events: none;
+    }
+
+    .profile-hero-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .profile-avatar-wrap {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--bg);
+      border: 4px solid var(--border);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-edit {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      border: 2px solid var(--surface2);
+    }
+
+    .profile-headline {
+      flex: 1;
+    }
+
+    .profile-display-name {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .profile-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .profile-edit-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+      font-family: var(--font-body);
+    }
+
+    .profile-edit-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .profile-tabs {
+      display: flex;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 6px;
+      margin-bottom: 32px;
+    }
+
+    .profile-tab {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .profile-tab.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .info-field {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .info-field-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 5px;
+    }
+
+    .info-field-val {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .info-field-val.editing {
+      background: transparent;
+      border: none;
+      outline: none;
+      width: 100%;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 0;
+    }
+
+    .info-field-val.editing:focus {
+      color: var(--accent);
+    }
+
+    /* settings groups */
+    .settings-group {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .settings-group-title {
+      padding: 13px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface3);
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      transition: background .2s;
+    }
+
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+
+    .settings-row:hover {
+      background: var(--surface3);
+    }
+
+    .settings-label {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .settings-desc {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .toggle {
+      width: 40px;
+      height: 22px;
+      border-radius: 11px;
+      background: var(--border2);
+      cursor: pointer;
+      transition: background .2s;
+      position: relative;
+      border: none;
+      flex-shrink: 0;
+    }
+
+    .toggle.on {
+      background: var(--accent);
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform .2s;
+    }
+
+    .toggle.on::after {
+      transform: translateX(18px);
+    }
+
+    .settings-select {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 6px 12px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 4.5 3 3 3-3'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 32px;
+    }
+
+    .settings-select:hover,
+    .settings-select:focus {
+      border-color: var(--accent);
+      background-color: var(--surface3);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+    }
+
+    .settings-select option {
+      background: #0f172a;
+      color: #fff;
+      padding: 10px;
+    }
+
+    /* med info section */
+    .med-info-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .med-info-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .allergy-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 77, 109, .08);
+      border: 1px solid rgba(255, 77, 109, .2);
+      color: var(--danger);
+      border-radius: 7px;
+      padding: 4px 10px;
+      font-size: 12px;
+      margin: 3px;
+    }
+
+    .allergy-tag button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .allergy-tag button:hover {
+      color: var(--danger);
+    }
+
+    .tag-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .emergency-card {
+      background: rgba(255, 77, 109, .05);
+      border: 1px solid rgba(255, 77, 109, .15);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+
+    .emergency-card-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--danger);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 8px;
+    }
+
+    /* danger zone */
+    .danger-zone {
+      background: rgba(255, 77, 109, .04);
+      border: 1px solid rgba(255, 77, 109, .15);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .danger-zone-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--danger);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 12px;
+    }
+
+    .btn-danger-solid {
+      padding: 9px 18px;
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: all .2s;
+    }
+
+    .btn-danger-solid:hover {
+      opacity: .85;
+    }
+
+    @media(max-width:960px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .extracted-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── QR MODAL ─────────────────────────────── */
+    .qr-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 12, 24, .85);
+      backdrop-filter: blur(18px);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn .3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    .qr-modal {
+      background: linear-gradient(145deg, rgba(15, 30, 51, .98), rgba(11, 22, 37, .99));
+      border: 1px solid rgba(0, 245, 200, .2);
+      border-radius: 28px;
+      padding: 48px;
+      width: 420px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 0 100px rgba(0, 245, 200, .12), 0 40px 80px rgba(0, 0, 0, .7);
+      animation: popIn .35s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(.8) translateY(30px);
+        opacity: 0
+      }
+
+      to {
+        transform: none;
+        opacity: 1
+      }
+    }
+
+    .qr-modal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 77, 109, .1);
+      border: 1px solid rgba(255, 77, 109, .25);
+      color: var(--danger);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .qr-modal-title {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .qr-modal-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    .qr-code-wrap {
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      display: inline-block;
+      margin-bottom: 24px;
+      box-shadow: 0 0 60px rgba(0, 245, 200, .2);
+      position: relative;
+    }
+
+    .qr-code-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      z-index: -1;
+      opacity: .8;
+    }
+
+    .qr-code-wrap img {
+      display: block;
+      border-radius: 8px;
+    }
+
+    .qr-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .qr-info-item {
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .qr-info-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 3px;
+    }
+
+    .qr-info-val {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .qr-close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all .2s;
+      font-family: monospace;
+    }
+
+    .qr-close-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── NOTIFICATION BANNER ──────────────────── */
+    .notif-banner {
+      background: linear-gradient(90deg, rgba(91, 150, 255, .1), rgba(0, 245, 200, .06));
+      border: 1px solid rgba(91, 150, 255, .22);
+      border-radius: 10px;
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+
+    .notif-banner-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .notif-banner-text {
+      flex: 1;
+      color: var(--muted);
+    }
+
+    .notif-banner-btn {
+      padding: 6px 14px;
+      background: var(--accent2);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .2s;
+      font-family: var(--font-body);
+    }
+
+    .notif-banner-btn:hover {
+      opacity: .85;
+    }
+
+    /* ── EC SMS ALERT MODAL ──────────────────── */
+    .ec-alert-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 12, 24, .8);
+      backdrop-filter: blur(12px);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn .25s ease;
+    }
+
+    .ec-alert-modal {
+      background: linear-gradient(145deg, rgba(46, 10, 20, .98), rgba(22, 5, 10, .99));
+      border: 1px solid rgba(255, 77, 109, .3);
+      border-radius: 24px;
+      padding: 36px;
+      width: 400px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 0 80px rgba(255, 77, 109, .15), 0 30px 60px rgba(0, 0, 0, .7);
+      animation: popIn .3s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .ec-alert-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      display: block;
+      animation: pulse 1.5s ease infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.12);
+      }
+    }
+
+    .ec-alert-title {
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--danger);
+      margin-bottom: 6px;
+    }
+
+    .ec-alert-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .ec-alert-contact {
+      background: rgba(255, 77, 109, .06);
+      border: 1px solid rgba(255, 77, 109, .15);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .ec-alert-contact-name {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+
+    .ec-alert-contact-detail {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .ec-alert-phone {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--danger);
+      margin-top: 4px;
+    }
+
+    .ec-alert-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-sms {
+      flex: 1;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--danger), #c7003a);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .25s;
+      box-shadow: 0 4px 20px rgba(255, 77, 109, .3);
+    }
+
+    .btn-sms:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(255, 77, 109, .45);
+    }
+
+    .rem-btn-notify {
+      padding: 5px 11px;
+      background: rgba(255, 77, 109, .08);
+      color: var(--danger);
+      border: 1px solid rgba(255, 77, 109, .25);
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+
+    .rem-btn-notify:hover {
+      background: rgba(255, 77, 109, .16);
+    }
+
+    /* ── OTP & FORGOT PASSWORD ────────────────── */
+    .otp-container {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 28px 0;
+    }
+
+    .otp-digit {
+      width: 52px;
+      height: 62px;
+      text-align: center;
+      font-family: var(--font-head);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--accent);
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid var(--border2);
+      border-radius: 14px;
+      outline: none;
+      caret-color: var(--accent);
+      transition: all 0.25s;
+    }
+
+    .otp-digit:focus {
+      border-color: var(--accent);
+      background: rgba(0, 242, 254, 0.06);
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.15), 0 0 0 4px rgba(0, 242, 254, 0.08);
+    }
+
+    .otp-digit.filled {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .forgot-link {
+      display: inline-block;
+      color: var(--accent2);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.2s;
+      margin-top: 4px;
+    }
+
+    .forgot-link:hover {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .timer-text {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .timer-text span {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .auth-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: color 0.2s;
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+    }
+
+    .auth-back:hover {
+      color: var(--accent);
+    }
+
+    .otp-title {
+      font-family: var(--font-head);
+      font-size: 24px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .otp-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    .otp-email {
+      text-align: center;
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .resend-row {
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .resend-btn {
+      background: none;
+      border: none;
+      color: var(--accent2);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: color 0.2s;
+    }
+
+    .resend-btn:hover {
+      color: var(--accent);
+    }
+
+    .resend-btn:disabled {
+      color: var(--muted2);
+      cursor: default;
+    }
+
+    .welcome-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .welcome-card {
+      background: rgba(10, 18, 30, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 245, 200, 0.15);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .welcome-logo {
+      font-size: 32px;
+      font-weight: 800;
+      font-family: var(--font-head);
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .welcome-logo span {
+      color: var(--accent);
+    }
+
+    .welcome-sub {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+
+    // ═══════════════════════════════════════════
+    //  localStorage helpers
+    // ═══════════════════════════════════════════
+    const LS = {
+      get: (k, fb) => { try { const v = localStorage.getItem('hv_' + k); return v ? JSON.parse(v) : fb; } catch { return fb; } },
+      set: (k, v) => { try { localStorage.setItem('hv_' + k, JSON.stringify(v)); } catch { } },
+      del: (k) => { try { localStorage.removeItem('hv_' + k); } catch { } }
+    };
+
+    const TRANSLATIONS = {
+      English: {
+        appName: 'HealthVault',
+        tagline: 'Your secure personal health companion',
+        signIn: 'Sign In',
+        createAccount: 'Create Account',
+        fullName: 'Full Name',
+        age: 'Age',
+        gender: 'Gender',
+        male: 'Male',
+        female: 'Female',
+        other: 'Other',
+        bloodGroup: 'Blood Group',
+        email: 'Email Address',
+        password: 'Password',
+        preferences: 'Preferences',
+        language: 'Language',
+        voice: 'Voice',
+        save: 'Save',
+        cancel: 'Cancel',
+        dashboard: 'Dashboard',
+        medicines: 'Medicines',
+        reminders: 'Reminders',
+        conditions: 'Conditions',
+        reports: 'Reports',
+        profileSettings: 'Profile & Settings',
+        signOut: 'Sign Out',
+        activeMeds: 'Active Medicines',
+        medAdherence: 'Med Adherence',
+        reportsUploaded: 'Reports Uploaded',
+        healthOverview: 'Health Overview',
+        welcomeBack: 'Welcome back',
+        riskScore: 'Health Risk Score',
+        trend: '7-Day Adherence Trend',
+        dosage: 'Dosage',
+        times: 'Times',
+        status: 'Status',
+        addMed: 'Add Medicine',
+        newMed: 'New Medicine',
+        medName: 'Medicine Name',
+        startDate: 'Start Date',
+        endDate: 'End Date',
+        reminderTimes: 'Reminder Times',
+        addTime: 'Add Time',
+        test: 'Test',
+        clearData: 'Clear Data',
+        personal: 'Personal',
+        medical: 'Medical History',
+        settings: 'Account Settings',
+        editProfile: 'Edit Profile',
+        personalInfo: 'Personal Information',
+        phone: 'Phone Number',
+        occupation: 'Occupation',
+        address: 'Address',
+        notSet: 'Not set',
+        accountSummary: 'Account Summary',
+        allergies: 'Allergies',
+        surgeries: 'Past Surgeries',
+        familyHistory: 'Family History',
+        vaccinations: 'Vaccinations',
+        emergencyContact: 'Emergency Contact',
+        relation: 'Relation',
+        saveGenerateQR: 'Save & Generate QR',
+        viewQR: 'View QR Code',
+        add: 'Add',
+        notifications: 'Notifications',
+        emailReminders: 'Email Reminders',
+        smsReminders: 'SMS Reminders',
+        pushNotifications: 'Push Notifications',
+        reminderAdvance: 'Reminder Advance Notice',
+        units: 'Measurement Units',
+        metric: 'Metric (kg, cm)',
+        imperial: 'Imperial (lb, in)',
+        privacySecurity: 'Privacy & Security',
+        name: 'Name',
+        remove: 'Remove',
+        addCondition: 'Add Condition',
+        conditionName: 'Condition Name',
+        diagnosisDate: 'Diagnosis Date',
+        severity: 'Severity',
+        mild: 'Mild',
+        moderate: 'Moderate',
+        severe: 'Severe',
+        diagnosedAt: 'Diagnosed At',
+        settingsSaved: 'Settings saved',
+        diseases: 'Conditions',
+        forgotPassword: 'Forgot Password?',
+        sendOtp: 'Send OTP',
+        verifyOtp: 'Verify OTP',
+        enterOtp: 'Enter Verification Code',
+        otpSent: 'We sent a 6-digit code to',
+        resendOtp: 'Resend Code',
+        resetPassword: 'Reset Password',
+        newPassword: 'New Password',
+        confirmPassword: 'Confirm Password',
+        backToLogin: '← Back to Login',
+        passwordChanged: 'Password changed successfully!',
+        invalidOtp: 'Invalid OTP. Please try again.',
+        otpVerified: 'OTP verified!',
+        passwordMismatch: 'Passwords do not match.'
+      },
+      Telugu: {
+        appName: 'హెల్త్‌వాల్ట్',
+        tagline: 'మీ సురక్షిత వ్యక్తిగత ఆరోగ్య సహచరుడు',
+        signIn: 'సైన్ ఇన్',
+        createAccount: 'ఖాతాను సృష్టించు',
+        fullName: 'పూర్తి పేరు',
+        age: 'వయస్సు',
+        gender: 'లింగం',
+        male: 'పురుషుడు',
+        female: 'స్త్రీ',
+        other: 'ఇతర',
+        bloodGroup: 'రక్త వర్గం',
+        email: 'ఈమెయిల్ చిరునామా',
+        password: 'పాస్‌వర్డ్',
+        preferences: 'ప్రాధాన్యతలు',
+        language: 'భాష',
+        voice: 'వాయిస్',
+        save: 'సేవ్ చేయి',
+        cancel: 'రద్దు చేయి',
+        dashboard: 'డాష్‌బోర్డ్',
+        medicines: 'మందులు',
+        reminders: 'రిమైండర్లు',
+        conditions: 'అనారోగ్యాలు',
+        reports: 'రిపోర్టులు',
+        profileSettings: 'ప్రొఫైల్ & సెట్టింగ్‌లు',
+        signOut: 'సైన్ అవుట్',
+        activeMeds: 'ప్రస్తుత మందులు',
+        medAdherence: 'మందుల నిబద్ధత',
+        reportsUploaded: 'అప్‌లోడ్ చేసిన రిపోర్టులు',
+        healthOverview: 'ఆరోగ్య అవలోకనం',
+        welcomeBack: 'స్వాగతం',
+        riskScore: 'ఆరోగ్య రిస్క్ స్కోరు',
+        trend: '7-రోజుల ట్రెండ్',
+        dosage: 'మోతాదు',
+        times: 'సమయాలు',
+        status: 'స్థితి',
+        addMed: 'మందును జోడించు',
+        newMed: 'కొత్త మందు',
+        medName: 'మందు పేరు',
+        startDate: 'ప్రారంభ తేదీ',
+        endDate: 'ముగింపు తేదీ',
+        reminderTimes: 'రిమైండర్ సమయాలు',
+        addTime: 'సమయాన్ని జోడించు',
+        test: 'పరీక్షించు',
+        clearData: 'డేటా తుడిచివేయి',
+        personal: 'వ్యక్తిగత',
+        medical: 'వైద్య చరిత్ర',
+        settings: 'ఖాతా సెట్టింగ్‌లు',
+        editProfile: 'ప్రొఫైల్ సవరించు',
+        personalInfo: 'వ్యక్తిగత సమాచారం',
+        phone: 'ఫోన్ నంబర్',
+        occupation: 'వృత్తి',
+        address: 'చిరునామా',
+        notSet: 'సెట్ చేయలేదు',
+        accountSummary: 'ఖాతా సారాంశం',
+        allergies: 'అలెర్జీలు',
+        surgeries: 'గత శస్త్రచికిత్సలు',
+        familyHistory: 'కుటుంబ చరిత్ర',
+        vaccinations: 'టీకాలు',
+        emergencyContact: 'అత్యవసర సంప్రదింపు',
+        relation: 'సంబంధం',
+        saveGenerateQR: 'సేవ్ & QR సృష్టించు',
+        viewQR: 'QR కోడ్ చూడు',
+        add: 'జోడించు',
+        notifications: 'నోటిఫికేషన్లు',
+        emailReminders: 'ఈమెయిల్ రిమైండర్లు',
+        smsReminders: 'SMS రిమైండర్లు',
+        pushNotifications: 'పుష్ నోటిఫికేషన్లు',
+        reminderAdvance: 'ముందస్తు నోటీసు',
+        units: 'కొలతలు',
+        metric: 'మెట్రిక్ (కిలో, సెం.మీ)',
+        imperial: 'ఇంపీరియల్ (పౌండ్లు, అంగుళాలు)',
+        privacySecurity: 'గోపనీయత & భద్రత',
+        name: 'పేరు',
+        remove: 'తొలగించు',
+        addCondition: 'అనారోగ్యాన్ని జోడించు',
+        conditionName: 'అనారోగ్యం పేరు',
+        diagnosisDate: 'నిర్ధారణ తేదీ',
+        severity: 'తీవ్రత',
+        mild: 'తక్కువ',
+        moderate: 'మధ్యస్థం',
+        severe: 'ఎక్కువ',
+        diagnosedAt: 'నిర్ధారణ జరిగింది',
+        settingsSaved: 'సెట్టింగ్‌లు సేవ్ చేయబడ్డాయి',
+        diseases: 'అనారోగ్యాలు',
+        forgotPassword: 'పాస్‌వర్డ్ మరచిపోయారా?',
+        sendOtp: 'OTP పంపు',
+        verifyOtp: 'OTP ధృవీకరించు',
+        enterOtp: 'ధృవీకరణ కోడ్ నమోదు చేయండి',
+        otpSent: 'మేము 6-అంకెల కోడ్‌ను పంపాము',
+        resendOtp: 'కోడ్ మళ్లీ పంపు',
+        resetPassword: 'పాస్‌వర్డ్ రీసెట్',
+        newPassword: 'కొత్త పాస్‌వర్డ్',
+        confirmPassword: 'పాస్‌వర్డ్ నిర్ధారణ',
+        backToLogin: '← లాగిన్‌కు తిరిగి వెళ్ళు',
+        passwordChanged: 'పాస్‌వర్డ్ విజయవంతంగా మార్చబడింది!',
+        invalidOtp: 'చెల్లని OTP. మళ్లీ ప్రయత్నించండి.',
+        otpVerified: 'OTP ధృవీకరించబడింది!',
+        passwordMismatch: 'పాస్‌వర్డ్లు సరిపోలలేదు.'
+      },
+      Hindi: {
+        appName: 'हेल्थवॉल्ट',
+        tagline: 'आपका सुरक्षित व्यक्तिगत स्वास्थ्य साथी',
+        signIn: 'साइन इन करें',
+        createAccount: 'खाता बनाएँ',
+        fullName: 'पूरा नाम',
+        age: 'आयु',
+        gender: 'लिंग',
+        male: 'पुरुष',
+        female: 'महिला',
+        other: 'अन्य',
+        bloodGroup: 'रक्त समूह',
+        email: 'ईमेल पता',
+        password: 'पासवर्ड',
+        preferences: 'वरीयताएँ',
+        language: 'भाषा',
+        voice: 'आवाज',
+        save: 'सहेजें',
+        cancel: 'रद्द करें',
+        dashboard: 'डैशबोर्ड',
+        medicines: 'दवाइयाँ',
+        reminders: 'अनुस्मारक',
+        conditions: 'स्थितियाँ',
+        reports: 'रिपोर्ट्स',
+        profileSettings: 'प्रोफ़ाइल और सेटिंग्स',
+        signOut: 'साइन आउट',
+        activeMeds: 'सक्रिय दवाएं',
+        medAdherence: 'दवा अनुपालन',
+        reportsUploaded: 'अपलोड की गई रिपोर्ट्स',
+        healthOverview: 'स्वास्थ्य अवलोकन',
+        welcomeBack: 'वापसी पर स्वागत है',
+        riskScore: 'स्वास्थ्य जोखिम स्कोर',
+        trend: '7-दिवसीय प्रवृत्ति',
+        dosage: 'खुराक',
+        times: 'समय',
+        status: 'स्थिति',
+        addMed: 'दवा जोड़ें',
+        newMed: 'नई दवा',
+        medName: 'दवा का नाम',
+        startDate: 'आरंभ तिथि',
+        endDate: 'समाप्ति तिथि',
+        reminderTimes: 'अनुस्मारक समय',
+        addTime: 'समय जोड़ें',
+        test: 'परीक्षण',
+        clearData: 'डेटा साफ़ करें',
+        personal: 'व्यक्तिगत',
+        medical: 'चिकित्सा इतिहास',
+        settings: 'खाता सेटिंग्स',
+        editProfile: 'प्रोफ़ाइल संपादित करें',
+        personalInfo: 'व्यक्तिगत जानकारी',
+        phone: 'फ़ोन नंबर',
+        occupation: 'व्यवसाय',
+        address: 'पता',
+        notSet: 'सेट नहीं है',
+        accountSummary: 'खाता सारांश',
+        allergies: 'एलर्जी',
+        surgeries: 'पिछली सर्जरी',
+        familyHistory: 'पारिवारिक इतिहास',
+        vaccinations: 'टीकाकरण',
+        emergencyContact: 'आपातकालीन संपर्क',
+        relation: 'संबंध',
+        saveGenerateQR: 'सहेजें और QR बनाएं',
+        viewQR: 'QR कोड देखें',
+        add: 'जोड़ें',
+        notifications: 'सूचनाएं',
+        emailReminders: 'ईमेल अनुस्मारक',
+        smsReminders: 'SMS अनुस्मारक',
+        pushNotifications: 'पुश सूचनाएं',
+        reminderAdvance: 'अनुस्मारक अग्रिम सूचना',
+        units: 'इकाइयाँ',
+        metric: 'मीट्रिक (किग्रा, सेमी)',
+        imperial: 'इंपीरियल (पाउंड, इंच)',
+        privacySecurity: 'गोपनीयता और सुरक्षा',
+        name: 'नाम',
+        remove: 'हटाएं',
+        addCondition: 'स्थिति जोड़ें',
+        conditionName: 'स्थिति का नाम',
+        diagnosisDate: 'निदान की तिथि',
+        severity: 'तीव्रता',
+        mild: 'हल्का',
+        moderate: 'मध्यम',
+        severe: 'गंभीर',
+        diagnosedAt: 'निदान किया गया',
+        settingsSaved: 'सेटिंग्स सहेजी गईं',
+        diseases: 'स्थितियाँ',
+        forgotPassword: 'पासवर्ड भूल गए?',
+        sendOtp: 'OTP भेजें',
+        verifyOtp: 'OTP सत्यापित करें',
+        enterOtp: 'सत्यापन कोड दर्ज करें',
+        otpSent: 'हमने 6-अंकों का कोड भेजा',
+        resendOtp: 'कोड पुनः भेजें',
+        resetPassword: 'पासवर्ड रीसेट करें',
+        newPassword: 'नया पासवर्ड',
+        confirmPassword: 'पासवर्ड की पुष्टि',
+        backToLogin: '← लॉगिन पर वापस',
+        passwordChanged: 'पासवर्ड सफलतापूर्वक बदला गया!',
+        invalidOtp: 'अमान्य OTP. कृपया पुनः प्रयास करें.',
+        otpVerified: 'OTP सत्यापित!',
+        passwordMismatch: 'पासवर्ड मेल नहीं खाते.'
+      },
+      Spanish: {
+        appName: 'HealthVault',
+        tagline: 'Su compañero de salud personal seguro',
+        signIn: 'Iniciar sesión',
+        createAccount: 'Crear cuenta',
+        fullName: 'Nombre completo',
+        age: 'Edad',
+        gender: 'Género',
+        male: 'Masculino',
+        female: 'Femenino',
+        other: 'Otro',
+        bloodGroup: 'Grupo sanguíneo',
+        email: 'Correo electrónico',
+        password: 'Contraseña',
+        preferences: 'Preferencias',
+        language: 'Idioma',
+        voice: 'Voz',
+        save: 'Guardar',
+        cancel: 'Cancelar',
+        dashboard: 'Panel',
+        medicines: 'Medicamentos',
+        reminders: 'Recordatorios',
+        conditions: 'Condiciones',
+        reports: 'Informes',
+        profileSettings: 'Perfil y ajustes',
+        signOut: 'Cerrar sesión',
+        activeMeds: 'Medicamentos activos',
+        medAdherence: 'Adherencia médica',
+        reportsUploaded: 'Informes subidos',
+        healthOverview: 'Resumen de salud',
+        welcomeBack: 'Bienvenido de nuevo',
+        riskScore: 'Puntuación de riesgo',
+        trend: 'Tendencia de 7 días',
+        dosage: 'Dosis',
+        times: 'Horarios',
+        status: 'Estado',
+        addMed: 'Añadir medicamento',
+        newMed: 'Nuevo medicamento',
+        medName: 'Nombre del medicamento',
+        startDate: 'Fecha inicio',
+        endDate: 'Fecha fin',
+        reminderTimes: 'Horas de recordatorio',
+        addTime: 'Añadir hora',
+        test: 'Probar',
+        clearData: 'Borrar datos',
+        personal: 'Personal',
+        medical: 'Historial médico',
+        settings: 'Ajustes de cuenta',
+        editProfile: 'Editar perfil',
+        personalInfo: 'Información personal',
+        phone: 'Teléfono',
+        occupation: 'Ocupación',
+        address: 'Dirección',
+        notSet: 'No establecido',
+        accountSummary: 'Resumen de cuenta',
+        allergies: 'Alergias',
+        surgeries: 'Cirugías pasadas',
+        familyHistory: 'Historia familiar',
+        vaccinations: 'Vacunas',
+        emergencyContact: 'Contacto de emergencia',
+        relation: 'Relación',
+        saveGenerateQR: 'Guardar y generar QR',
+        viewQR: 'Ver código QR',
+        add: 'Añadir',
+        notifications: 'Notificaciones',
+        emailReminders: 'Recordatorios por email',
+        smsReminders: 'Recordatorios por SMS',
+        pushNotifications: 'Notificaciones push',
+        reminderAdvance: 'Aviso previo',
+        units: 'Unidades',
+        metric: 'Métrico',
+        imperial: 'Imperial',
+        privacySecurity: 'Privacidad y seguridad',
+        name: 'Nombre',
+        remove: 'Eliminar',
+        addCondition: 'Añadir condición',
+        conditionName: 'Nombre de condición',
+        diagnosisDate: 'Fecha de diagnóstico',
+        severity: 'Gravedad',
+        mild: 'Leve',
+        moderate: 'Moderada',
+        severe: 'Grave',
+        diagnosedAt: 'Diagnosticado en',
+        settingsSaved: 'Ajustes guardados',
+        diseases: 'Enfermedades',
+        forgotPassword: '¿Olvidó su contraseña?',
+        sendOtp: 'Enviar OTP',
+        verifyOtp: 'Verificar OTP',
+        enterOtp: 'Ingrese el código de verificación',
+        otpSent: 'Enviamos un código de 6 dígitos a',
+        resendOtp: 'Reenviar código',
+        resetPassword: 'Restablecer contraseña',
+        newPassword: 'Nueva contraseña',
+        confirmPassword: 'Confirmar contraseña',
+        backToLogin: '← Volver al inicio de sesión',
+        passwordChanged: '¡Contraseña cambiada exitosamente!',
+        invalidOtp: 'OTP inválido. Inténtelo de nuevo.',
+        otpVerified: '¡OTP verificado!',
+        passwordMismatch: 'Las contraseñas no coinciden.'
+      },
+      Arabic: {
+        appName: 'هيلث فولت',
+        tagline: 'رفيقك الصحي الشخصي الآمن',
+        signIn: 'تسجيل الدخول',
+        createAccount: 'إنشاء حساب',
+        fullName: 'الاسم الكامل',
+        age: 'العمر',
+        gender: 'الجنس',
+        male: 'ذكر',
+        female: 'أنثى',
+        other: 'آخر',
+        bloodGroup: 'فصيلة الدم',
+        email: 'البريد الإلكتروني',
+        password: 'كلمة المرور',
+        preferences: 'تفضيلات',
+        language: 'اللغة',
+        voice: 'صوت',
+        save: 'حفظ',
+        cancel: 'إلغاء',
+        dashboard: 'لوحة القيادة',
+        medicines: 'الأدوية',
+        reminders: 'التذكيرات',
+        conditions: 'الحالات',
+        reports: 'التقارير',
+        profileSettings: 'الملف الشخصي والإعدادات',
+        signOut: 'تسجيل الخروج',
+        activeMeds: 'الأدوية النشطة',
+        medAdherence: 'الالتزام بالدواء',
+        reportsUploaded: 'التقارير المحملة',
+        healthOverview: 'نظرة عامة على الصحة',
+        welcomeBack: 'مرحباً بعودتك',
+        riskScore: 'درجة الخطر الصحي',
+        trend: 'اتجاه 7 أيام',
+        dosage: 'الجرعة',
+        times: 'الأوقات',
+        status: 'الحالة',
+        addMed: 'إضافة دواء',
+        newMed: 'دواء جديد',
+        medName: 'اسم الدواء',
+        startDate: 'تاريخ البدء',
+        endDate: 'تاريخ الانتهاء',
+        reminderTimes: 'أوقات التذكير',
+        addTime: 'إضافة وقت',
+        test: 'اختبار',
+        clearData: 'مسح البيانات',
+        personal: 'شخصي',
+        medical: 'التاريخ الطبي',
+        settings: 'إعدادات الحساب',
+        editProfile: 'تعديل الملف الشخصي',
+        personalInfo: 'معلومات شخصية',
+        phone: 'الهاتف',
+        occupation: 'المهنة',
+        address: 'العنوان',
+        notSet: 'لم يحدد',
+        accountSummary: 'ملخص الحساب',
+        allergies: 'الحساسية',
+        surgeries: 'عمليات سابقة',
+        familyHistory: 'تاريخ العائلة',
+        vaccinations: 'التطعيمات',
+        emergencyContact: 'جهة اتصال للطوارئ',
+        relation: 'العلاقة',
+        saveGenerateQR: 'حفظ وإنشاء QR',
+        viewQR: 'عرض رمز QR',
+        add: 'إضافة',
+        notifications: 'التنبيهات',
+        emailReminders: 'تذكيرات البريد',
+        smsReminders: 'تذكيرات SMS',
+        pushNotifications: 'تنبيهات المتصفح',
+        reminderAdvance: 'إشعار مسبق',
+        units: 'الوحدات',
+        metric: 'متري',
+        imperial: 'إمبراطوري',
+        privacySecurity: 'الخصوصية والأمان',
+        name: 'الاسم',
+        remove: 'إزالة',
+        addCondition: 'إضافة حالة',
+        conditionName: 'اسم الحالة',
+        diagnosisDate: 'تاريخ التشخيص',
+        severity: 'الحدة',
+        mild: 'خفيف',
+        moderate: 'متوسط',
+        severe: 'شديد',
+        diagnosedAt: 'تم التشخيص في',
+        settingsSaved: 'تم حفظ الإعدادات',
+        diseases: 'الأمراض',
+        forgotPassword: 'هل نسيت كلمة المرور؟',
+        sendOtp: 'إرسال OTP',
+        verifyOtp: 'تحقق من OTP',
+        enterOtp: 'أدخل رمز التحقق',
+        otpSent: 'أرسلنا رمزًا مكونًا من 6 أرقام إلى',
+        resendOtp: 'إعادة إرسال الرمز',
+        resetPassword: 'إعادة تعيين كلمة المرور',
+        newPassword: 'كلمة مرور جديدة',
+        confirmPassword: 'تأكيد كلمة المرور',
+        backToLogin: '→ العودة إلى تسجيل الدخول',
+        passwordChanged: 'تم تغيير كلمة المرور بنجاح!',
+        invalidOtp: 'OTP غير صالح. حاول مرة أخرى.',
+        otpVerified: 'تم التحقق من OTP!',
+        passwordMismatch: 'كلمات المرور غير متطابقة.'
+      }
+    };
+
+    const storeKey = (email) => 'data_' + email.replace(/[^a-z0-9]/gi, '_');
+    const loadStore = (email) => LS.get(storeKey(email), {
+      medicines: [], diseases: [], reports: [], reminders: [], nextId: 1,
+      medInfo: { allergies: [], surgeries: [], familyHistory: [], vaccinations: [], emergencyContact: { name: '', phone: '', relation: '' } },
+      settings: { emailReminders: true, smsReminders: false, pushNotifications: true, reminderAdvance: '30min', theme: 'dark', language: 'English', voice: 'Auto', units: 'metric', shareData: false }
+    });
+    const persistStore = (email, data) => LS.set(storeKey(email), data);
+
+    // ═══════════════════════════════════════════
+    //  AI / Risk
+    // ═══════════════════════════════════════════
+    function calcRisk(diseases, age) {
+      const rf = { 'diabetes': 25, 'type 2 diabetes': 25, 'hypertension': 20, 'heart disease': 35, 'kidney disease': 30, 'thyroid disorder': 10, 'anemia': 10, 'cholesterol': 15, 'asthma': 8, 'obesity': 12 };
+      let score = diseases.reduce((s, d) => s + (rf[d.disease_name?.toLowerCase()] || 5), 0);
+      if (age > 60) score += 20; else if (age > 45) score += 10; else if (age > 30) score += 5;
+      const names = diseases.map(d => d.disease_name?.toLowerCase());
+      if (names.some(n => n.includes('diabetes')) && names.includes('hypertension')) score = Math.round(score * 1.4);
+      if (names.includes('heart disease')) score = Math.round(score * 1.3);
+      score = Math.min(score, 100);
+      const level = score < 30 ? 'Low' : score < 60 ? 'Moderate' : 'High';
+      const color = score < 30 ? '#22d68a' : score < 60 ? '#ffb830' : '#ff4d6d';
+      const recs = [];
+      if (score >= 60) recs.push('Schedule a cardiology consultation soon.');
+      if (names.some(n => n.includes('diabetes'))) recs.push('Monitor blood glucose daily.');
+      if (names.includes('hypertension')) recs.push('Reduce sodium. Check BP twice daily.');
+      if (age > 50) recs.push('Annual comprehensive screening recommended.');
+      if (!recs.length) recs.push('Great profile! Maintain your healthy lifestyle.');
+      return { score, level, color, recommendations: recs };
+    }
+
+    function extractFromText(text) {
+      const t = text.toLowerCase();
+      const dList = ['diabetes', 'hypertension', 'anemia', 'thyroid disorder', 'heart disease', 'kidney disease', 'asthma', 'arthritis', 'cholesterol', 'obesity', 'migraine', 'depression'];
+      const mList = ['metformin', 'amlodipine', 'atorvastatin', 'lisinopril', 'aspirin', 'omeprazole', 'paracetamol', 'insulin', 'levothyroxine', 'losartan', 'ibuprofen', 'cetirizine', 'ramipril'];
+      const diseases = dList.filter(d => t.includes(d));
+      const meds = mList.filter(m => t.includes(m)).map(m => m[0].toUpperCase() + m.slice(1));
+      const tests = {};
+      if (t.includes('glucose') || t.includes('sugar')) tests['Blood Glucose'] = '110 mg/dL';
+      if (t.includes('hemoglobin') || t.includes('hgb')) tests['Hemoglobin'] = '13.2 g/dL';
+      if (t.includes('cholesterol')) tests['Cholesterol'] = '195 mg/dL';
+      if (t.includes('tsh')) tests['TSH'] = '2.4 mIU/L';
+      if (t.includes('creatinine')) tests['Creatinine'] = '0.9 mg/dL';
+      if (t.includes('blood pressure') || t.includes(' bp ')) tests['Blood Pressure'] = '124/82 mmHg';
+      return { diseases_detected: diseases, medicines_detected: meds, test_results: tests };
+    }
+
+    function mockTrend() {
+      return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => ({ day, adherence: Math.floor(Math.random() * 28) + 72 }));
+    }
+
+    // file type helpers
+    function getFileIcon(name = '') {
+      const ext = (name.split('.').pop() || '').toLowerCase();
+      if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic'].includes(ext)) return { icon: '🖼️', color: '#a855f7', label: 'Image' };
+      if (ext === 'pdf') return { icon: '📄', color: '#ff4d6d', label: 'PDF' };
+      if (['doc', 'docx'].includes(ext)) return { icon: '📝', color: '#4d8eff', label: 'Word' };
+      if (['xls', 'xlsx'].includes(ext)) return { icon: '📊', color: '#22d68a', label: 'Excel' };
+      if (ext === 'txt') return { icon: '📃', color: '#ffb830', label: 'Text' };
+      return { icon: '📎', color: '#5a7a9a', label: 'File' };
+    }
+    function isImage(name = '') {
+      return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic'].includes((name.split('.').pop() || '').toLowerCase());
+    }
+
+    // ═══════════════════════════════════════════
+    //  Toast
+    // ═══════════════════════════════════════════
+    function useToast() {
+      const [toasts, setT] = React.useState([]);
+      const toast = (msg, type = 'ok') => {
+        const id = Date.now();
+        setT(p => [...p, { id, msg, type }]);
+        setTimeout(() => setT(p => p.filter(t => t.id !== id)), 3500);
+      };
+      return { toasts, toast };
+    }
+    function ToastContainer({ toasts }) {
+      return <div className="toast-wrap">{toasts.map(t => (
+        <div key={t.id} className={`toast toast-${t.type}`}>{t.msg}</div>))}</div>;
+    }
+
+    // ═══════════════════════════════════════════
+    //  Push Notification Helper
+    // ═══════════════════════════════════════════
+    const Notify = {
+      async request() {
+        if (!('Notification' in window)) return 'unsupported';
+        if (Notification.permission === 'granted') return 'granted';
+        if (Notification.permission !== 'denied') {
+          const perm = await Notification.requestPermission();
+          return perm;
+        }
+        return Notification.permission;
+      },
+      send(title, body) {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        try { new Notification(title, { body, tag: 'healthvault-reminder' }); } catch (e) { }
+      },
+      get allowed() { return 'Notification' in window && Notification.permission === 'granted'; }
+    };
+
+    // ═══════════════════════════════════════════
+    //  QR Modal
+    // ═══════════════════════════════════════════
+    function QRModal({ user, ecForm, store, onClose }) {
+      const medInfo = store?.medInfo || { allergies: [], surgeries: [], familyHistory: [], vaccinations: [] };
+      const conditions = store?.diseases?.map(d => d.disease_name).join(', ') || 'None';
+      const allergies = medInfo.allergies?.join(', ') || 'None';
+      const surgeries = medInfo.surgeries?.join(', ') || 'None';
+      const activeMeds = store?.medicines?.filter(m => m.active).map(m => m.name).join(', ') || 'None';
+      const vaccs = medInfo.vaccinations?.join(', ') || 'None';
+      const famHist = medInfo.familyHistory?.join(', ') || 'None';
+
+      const qrText = 'MEDICAL EMERGENCY\nName: ' + (user.name || 'N/A') + '\nBlood: ' + (user.blood_group || 'N/A') + '\nAge: ' + (user.age || 'N/A') + '\nContact: ' + (ecForm.name || '') + ' (' + (ecForm.relation || '') + ') ' + (ecForm.phone || '') + '\nConditions: ' + conditions + '\nAllergies: ' + allergies + '\nSurgeries: ' + surgeries + '\nMeds: ' + activeMeds + '\nVaccinations: ' + vaccs + '\nFamily Hx: ' + famHist;
+      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qrText);
+      React.useEffect(() => {
+        const fn = (e) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', fn);
+        return () => window.removeEventListener('keydown', fn);
+      }, []);
+      return (
+        <div className="qr-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+          <div className="qr-modal" style={{ maxWidth: 450 }}>
+            <button className="qr-close-btn" onClick={onClose}>&#x2715;</button>
+            <div className="qr-modal-badge">🆘 Emergency QR Code</div>
+            <div className="qr-modal-title">Scan In Emergency</div>
+            <div className="qr-modal-sub">Show this QR to first responders.<br />Contains your full medical history.</div>
+            <div className="qr-code-wrap">
+              <img src={qrUrl} alt="Emergency QR" width={220} height={220} />
+            </div>
+            <div className="qr-info-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px 16px', maxHeight: '180px', overflowY: 'auto' }}>
+              {[
+                { label: 'Name', val: user.name || 'N/A' },
+                { label: 'Blood Group', val: user.blood_group || 'N/A' },
+                { label: 'Age', val: user.age ? user.age + ' yrs' : 'N/A' },
+                { label: 'EC Contact', val: ecForm.name || 'N/A' },
+                { label: 'EC Phone', val: ecForm.phone || 'N/A' },
+                { label: 'EC Relation', val: ecForm.relation || 'N/A' },
+                { label: 'Conditions', val: conditions },
+                { label: 'Allergies', val: allergies },
+                { label: 'Active Meds', val: activeMeds },
+                { label: 'Surgeries', val: surgeries },
+                { label: 'Vaccinations', val: vaccs },
+                { label: 'Family History', val: famHist }
+              ].map(item => (
+                <div key={item.label} className="qr-info-item">
+                  <div className="qr-info-label">{item.label}</div>
+                  <div className="qr-info-val" style={{ fontSize: 13, lineHeight: 1.3 }}>{item.val}</div>
+                </div>
+              ))}
+            </div>
+            <button className="btn-accent" style={{ width: '100%', marginTop: 12 }} onClick={() => {
+              const a = document.createElement('a');
+              a.href = qrUrl; a.download = 'emergency-qr.png'; a.click();
+            }}>⬇ Download QR Code</button>
+          </div>
+        </div>
+      );
+    }
+
+    // ═══════════════════════════════════════════
+    //  Chart
+    // ═══════════════════════════════════════════
+    function AdherenceChart({ data }) {
+      const ref = React.useRef(null), chartRef = React.useRef(null);
+      React.useEffect(() => {
+        if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; }
+        if (!ref.current || !data) return;
+        chartRef.current = new Chart(ref.current, {
+          type: 'line',
+          data: {
+            labels: data.map(d => d.day), datasets: [{
+              label: 'Adherence %', data: data.map(d => d.adherence),
+              borderColor: '#00e5b8', backgroundColor: 'rgba(0,229,184,.07)', borderWidth: 2.5,
+              pointBackgroundColor: '#00e5b8', pointRadius: 4, tension: .4, fill: true
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { color: '#1f3050' }, ticks: { color: '#5a7a9a', font: { family: 'DM Sans', size: 11 } } },
+              y: { min: 0, max: 100, grid: { color: '#1f3050' }, ticks: { color: '#5a7a9a', callback: v => v + '%', font: { size: 11 } } }
+            }
+          }
+        });
+        return () => { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; } };
+      }, [data]);
+      return <canvas ref={ref} />;
+    }
+
+    // ═══════════════════════════════════════════
+    //  Risk Gauge
+    // ═══════════════════════════════════════════
+    function RiskGauge({ score, level, color, recommendations }) {
+      const r = 50, circ = 2 * Math.PI * r, dash = (score / 100) * circ;
+      return (
+        <div className="gauge-wrap">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+            <div className="gauge-ring">
+              <svg className="gauge-svg" viewBox="0 0 120 120">
+                <circle className="gauge-bg" cx="60" cy="60" r={r} />
+                <circle className="gauge-fill" cx="60" cy="60" r={r} stroke={color} strokeDasharray={`${dash} ${circ}`} />
+              </svg>
+              <div className="gauge-lbl">
+                <div className="gauge-score" style={{ color }}>{score}</div>
+                <div className="gauge-txt">/100</div>
+              </div>
+            </div>
+            <div className="risk-level" style={{ color }}>{level} Risk</div>
+          </div>
+          <ul className="recs-list">{recommendations.map((r, i) => (
+            <li key={i} className="rec-item"><div className="rec-dot" />{r}</li>))}</ul>
+        </div>
+      );
+    }
+
+    // ═══════════════════════════════════════════
+    //  AUTH PAGE
+    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════
+    //  WELCOME OVERLAY
+    // ═══════════════════════════════════════════
+    const LANG_CODES = {
+      'English': 'en-US',
+      'Hindi': 'hi-IN',
+      'Telugu': 'te-IN',
+      'Spanish': 'es-ES',
+      'Arabic': 'ar-SA'
+    };
+
+    /**
+     * Find the best voice for a given language code.
+     * @param {string} langCode - e.g. 'te-IN'
+     * @returns {SpeechSynthesisVoice|null}
+     */
+    const getBestVoice = (langCode) => {
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices.length) return null;
+
+      // Try exact match
+      const exact = voices.find(v => v.lang.toLowerCase() === langCode.toLowerCase());
+      if (exact) return exact;
+
+      // Try lang match (first 2 chars)
+      const langOnly = langCode.split('-')[0].toLowerCase();
+      const match = voices.find(v => v.lang.toLowerCase().startsWith(langOnly));
+      if (match) return match;
+
+      return null;
+    };
+
+    function WelcomeOverlay({ onDone }) {
+      const [lang, setLang] = React.useState('English');
+      const [voiceEnabled, setVoiceEnabled] = React.useState('No');
+      const [voices, setVoices] = React.useState([]);
+      const [selectedVoice, setSelectedVoice] = React.useState('');
+
+      React.useEffect(() => {
+        const load = () => {
+          const v = window.speechSynthesis.getVoices();
+          setVoices(v);
+          // Set a default voice for the language if found
+          const best = getBestVoice(LANG_CODES[lang]);
+          if (best) setSelectedVoice(best.name);
+        };
+        load();
+        window.speechSynthesis.onvoiceschanged = load;
+        return () => window.speechSynthesis.onvoiceschanged = null;
+      }, [lang]);
+
+      const TTS = {
+        English: { lang: 'Selected language: English.', voiceOn: 'Voice assistance enabled.', welcome: 'Welcome to Health Vault.' },
+        Hindi: { lang: 'चयनित भाषा: हिन्दी.', voiceOn: 'आवाज़ सहायता सक्षम की गई.', welcome: 'हेल्थ वॉल्ट में आपका स्वागत है.' },
+        Telugu: { lang: 'ఎంచుకున్న భాష: తెలుగు.', voiceOn: 'వాయిస్ అసిస్టెన్స్ ఎనేబుల్ చేయబడింది.', welcome: 'హెల్త్‌వాల్ట్‌కు స్వాగతం.' }
+      };
+
+      const speak = (text, forcedLang = null) => {
+        if (voiceEnabled !== 'Yes') return;
+        const synth = window.speechSynthesis;
+        synth.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        const code = LANG_CODES[forcedLang || lang] || 'en-US';
+        u.lang = code;
+
+        const voice = getBestVoice(code);
+        if (voice) {
+          u.voice = voice;
+        } else if (code.startsWith('te') || code.startsWith('hi')) {
+          // If no specific voice, attempt to notify user (silent or fallback)
+          console.warn(`No specific voice found for ${code}. Falling back to default.`);
+        }
+
+        synth.speak(u);
+      };
+
+      const handleStart = () => {
+        if (voiceEnabled === 'Yes') speak(TTS[lang].welcome);
+        onDone(lang, voiceEnabled === 'Yes', selectedVoice);
+      };
+
+      return (
+        <div className="welcome-overlay">
+          <div className="welcome-card">
+            <div className="welcome-logo">✦ Health<span>Vault</span></div>
+            <div className="welcome-sub">Select your preferences to begin</div>
+
+            <div className="form-group" style={{ textAlign: 'left' }}>
+              <label className="form-label">Language</label>
+              <select className="form-input form-select" value={lang} onChange={e => {
+                const newLang = e.target.value;
+                setLang(newLang);
+                if (voiceEnabled === 'Yes') {
+                  const synth = window.speechSynthesis;
+                  synth.cancel();
+                  const u = new SpeechSynthesisUtterance(TTS[newLang].lang);
+                  u.lang = LANG_CODES[newLang] || 'en-US';
+                  synth.speak(u);
+                }
+              }}>
+                {['English', 'Hindi', 'Telugu'].map(l => <option key={l}>{l}</option>)}
+              </select>
+            </div>
+
+
+
+            <button className="btn-primary" style={{ marginTop: 32 }} onClick={handleStart}>
+              Get Started →
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    const BLOOD_GROUPS = ['A+', 'A−', 'B+', 'B−', 'AB+', 'AB−', 'O+', 'O−'];
+
+    function AuthPage({ onLogin }) {
+      // Multi-step flow: login | register | otp-register | forgot | otp-reset | new-password
+      const [step, setStep] = React.useState('login');
+      const [form, setForm] = React.useState({
+        name: '', email: '', password: '', phone: '', age: '', gender: 'male', blood_group: 'A+',
+        language: LS.get('temp_lang', 'English'), voice: LS.get('voice_enabled', true) ? 'Auto' : 'Off',
+        loginId: ''
+      });
+      const [voices, setVoices] = React.useState([]);
+      const [showPw, setShowPw] = React.useState(false);
+      const [error, setError] = React.useState('');
+      const [otp, setOtp] = React.useState(['', '', '', '', '', '']);
+      const [loading, setLoading] = React.useState(false);
+      const [timer, setTimer] = React.useState(0);
+      const [newPw, setNewPw] = React.useState('');
+      const [confirmPw, setConfirmPw] = React.useState('');
+      const [pendingAcc, setPendingAcc] = React.useState(null);
+      const [toasts, setToasts] = React.useState([]);
+      const otpRefs = React.useRef([]);
+      const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+      const showToast = (msg, type = 'ok') => {
+        const id = Date.now();
+        setToasts(p => [...p, { id, msg, type }]);
+        setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), 5000);
+      };
+
+      const t = (key) => {
+        const lang = form.language || 'English';
+        return TRANSLATIONS[lang]?.[key] || TRANSLATIONS.English[key] || key;
+      };
+
+      // Send OTP via backend API
+      const generateOtp = async () => {
+        setOtp(['', '', '', '', '', '']);
+        setTimer(60);
+        setLoading(true);
+        try {
+          const res = await fetch('/api/otp/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: form.email.toLowerCase() })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || 'Failed to send OTP');
+          showToast('📩 OTP sent to ' + form.email, 'ok');
+        } catch (err) {
+          showToast('⚠ ' + err.message, 'err');
+        }
+        setLoading(false);
+        setTimeout(() => otpRefs.current[0]?.focus(), 200);
+      };
+
+      // Countdown timer
+      React.useEffect(() => {
+        if (timer <= 0) return;
+        const t = setTimeout(() => setTimer(p => p - 1), 1000);
+        return () => clearTimeout(t);
+      }, [timer]);
+
+      // Voice loading
+      React.useEffect(() => {
+        const synth = window.speechSynthesis;
+        const load = () => {
+          let vList = synth.getVoices();
+          if (vList.length > 0) setVoices(vList);
+        };
+        load();
+        if ('onvoiceschanged' in synth) synth.onvoiceschanged = load;
+        const interval = setInterval(() => {
+          const currentVoices = synth.getVoices();
+          if (currentVoices.length > 0) {
+            setVoices(currentVoices);
+            clearInterval(interval);
+          }
+        }, 1500);
+        return () => {
+          clearInterval(interval);
+          if ('onvoiceschanged' in synth) synth.onvoiceschanged = null;
+        };
+      }, []);
+
+      // Handle OTP digit input
+      const handleOtpChange = (idx, val) => {
+        if (val.length > 1) val = val.slice(-1);
+        if (val && !/^\d$/.test(val)) return;
+        const next = [...otp];
+        next[idx] = val;
+        setOtp(next);
+        // Auto-advance
+        if (val && idx < 5) {
+          otpRefs.current[idx + 1]?.focus();
+        }
+      };
+
+      const handleOtpKeyDown = (idx, e) => {
+        if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
+          otpRefs.current[idx - 1]?.focus();
+        }
+        if (e.key === 'Enter') verifyOtp();
+      };
+
+      // Submit login or register
+      const submit = async () => {
+        setError('');
+
+        if (step === 'login') {
+          const identifier = form.loginId.trim();
+          if (!identifier || !form.password) { setError('Email/Phone and password are required.'); return; }
+
+          setLoading(true);
+          const fd = new URLSearchParams();
+          fd.append('username', identifier);
+          fd.append('password', form.password);
+
+          try {
+            const res = await fetch('/api/auth/token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: fd
+            });
+            const authData = await res.json();
+            if (!res.ok) throw new Error(authData.detail || 'Login failed');
+
+            localStorage.setItem('access_token', authData.access_token);
+
+            const prefRes = await fetch('/api/profile/', {
+              headers: { 'Authorization': 'Bearer ' + authData.access_token }
+            });
+            const profileData = await prefRes.json();
+            profileData.user.photo = null;
+
+            // Persist raw session for compatibility with App.jsx legacy code
+            LS.set('session', profileData.user);
+
+            // Pass profile directly so App.jsx doesn't load empty localStorage
+            onLogin(profileData.user, profileData);
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        } else {
+          const identifier = form.phone.trim();
+          if (!identifier || !form.password) { setError('Phone number and password are required.'); return; }
+          if (!form.name || !form.age) { setError('Name and Age are required fields.'); return; }
+
+          setLoading(true);
+          try {
+            const regRes = await fetch('/api/auth/register', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: form.name, email: form.email ? form.email.toLowerCase() : '',
+                phone: identifier, password: form.password,
+                age: parseInt(form.age || 30), gender: form.gender, blood_group: form.blood_group
+              })
+            });
+            const regData = await regRes.json();
+            if (!regRes.ok) throw new Error(regData.detail || 'Registration failed');
+
+            showToast('Account created successfully! Please sign in.', 'ok');
+            setStep('login');
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        }
+      };
+
+      // Verify OTP via backend API
+      const verifyOtp = async () => {
+        setError('');
+        const entered = otp.join('');
+        if (entered.length < 6) { setError('Please enter all 6 digits.'); return; }
+        setLoading(true);
+        try {
+          const res = await fetch('/api/otp/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: (pendingAcc?.email || form.email || form.phone).toLowerCase(), code: entered })
+          });
+          const data = await res.json();
+          if (!res.ok) { setError(data.detail || t('invalidOtp')); setLoading(false); return; }
+
+          if (step === 'otp-register' || step === 'otp-login') {
+            showToast('✓ ' + t('otpVerified'), 'ok');
+            LS.set('session', pendingAcc);
+            onLogin(pendingAcc);
+          } else if (step === 'otp-reset') {
+            showToast('✓ ' + t('otpVerified'), 'ok');
+            setStep('new-password');
+            setError('');
+          }
+        } catch (err) {
+          setError(err.message);
+        }
+        setLoading(false);
+      };
+
+      // Send forgot password OTP
+      const sendForgotOtp = () => {
+        setError('');
+        const identifier = step === 'login' ? form.loginId.trim() : form.phone.trim();
+        if (!identifier) { setError('Please enter your email or phone.'); return; }
+        const accounts = LS.get('accounts', {});
+        // Find existing account by login ID, phone or email
+        let acc = accounts[identifier.toLowerCase()];
+        if (!acc) acc = Object.values(accounts).find(a => a.phone && a.phone === identifier);
+        // Fallback for email as well if they just entered email
+        if (!acc) acc = Object.values(accounts).find(a => a.email && a.email === identifier.toLowerCase());
+        if (!acc) { setError('No account found.'); return; }
+        set('email', acc.email || acc.phone);
+        set('phone', acc.phone);
+        setPendingAcc(acc);
+        setStep('otp-reset');
+        setTimeout(() => generateOtp(), 100);
+      };
+
+      // Reset password
+      const resetPassword = () => {
+        setError('');
+        if (!newPw || !confirmPw) { setError('Both fields are required.'); return; }
+        if (newPw !== confirmPw) { setError(t('passwordMismatch')); return; }
+        if (newPw.length < 4) { setError('Password must be at least 4 characters.'); return; }
+        const accounts = LS.get('accounts', {});
+        accounts[pendingAcc.phone || pendingAcc.email] = { ...pendingAcc, password: newPw };
+        LS.set('accounts', accounts);
+        showToast('✓ ' + t('passwordChanged'), 'ok');
+        setStep('login');
+        set('password', '');
+        setNewPw('');
+        setConfirmPw('');
+      };
+
+      const isMainStep = step === 'login' || step === 'register';
+
+      // OTP Screen (used for register, login, and forgot password verification)
+      const renderOtpScreen = () => (
+        <>
+          <button className="auth-back" onClick={() => { setStep(step === 'otp-reset' ? 'forgot' : (step === 'otp-login' ? 'login' : 'register')); setError(''); }}>
+            {t('backToLogin')}
+          </button>
+          <div style={{ textAlign: 'center', fontSize: 48, marginBottom: 8 }}>🔐</div>
+          <div className="otp-title">{t('enterOtp')}</div>
+          <div className="otp-sub">{t('otpSent')}</div>
+          <div className="otp-email">{form.email}</div>
+          {error && <div className="error-msg">⚠ {error}</div>}
+          <div className="otp-container">
+            {otp.map((digit, i) => (
+              <input
+                key={i}
+                ref={el => otpRefs.current[i] = el}
+                className={`otp-digit ${digit ? 'filled' : ''}`}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={e => handleOtpChange(i, e.target.value)}
+                onKeyDown={e => handleOtpKeyDown(i, e)}
+                onFocus={e => e.target.select()}
+              />
+            ))}
+          </div>
+          <button className="btn-primary" onClick={verifyOtp}>{t('verifyOtp')} →</button>
+          <div className="resend-row">
+            {timer > 0
+              ? <div className="timer-text">{t('resendOtp')} in <span>{timer}s</span></div>
+              : <button className="resend-btn" onClick={generateOtp}>🔄 {t('resendOtp')}</button>
+            }
+          </div>
+        </>
+      );
+
+      return (
+        <div className="auth-wrap">
+          <div className="auth-card">
+            <div className="auth-logo">✦ {t('appName')}</div>
+            <div className="auth-sub">{t('tagline')}</div>
+
+            {/* Main tabs - only show on login/register */}
+            {isMainStep && <>
+              <div className="tab-row">
+                <button className={`tab-btn ${step === 'login' ? 'active' : ''}`} onClick={() => { setStep('login'); setError(''); }}>{t('signIn')}</button>
+                <button className={`tab-btn ${step === 'register' ? 'active' : ''}`} onClick={() => { setStep('register'); setError(''); }}>{t('createAccount')}</button>
+              </div>
+              {error && <div className="error-msg">⚠ {error}</div>}
+            </>}
+
+            {/* ── REGISTER FORM ── */}
+            {step === 'register' && <>
+              <div className="form-group">
+                <label className="form-label">{t('fullName')}</label>
+                <input className="form-input" placeholder="Jane Doe" value={form.name} onChange={e => set('name', e.target.value)} />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">{t('age')}</label>
+                  <input className="form-input" type="number" min="1" max="120" placeholder="32" value={form.age} onChange={e => set('age', e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">{t('gender')}</label>
+                  <select className="form-input form-select" value={form.gender} onChange={e => set('gender', e.target.value)}>
+                    <option value="male">Male</option><option value="female">Female</option><option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('bloodGroup')}</label>
+                <select className="form-input form-select" value={form.blood_group} onChange={e => set('blood_group', e.target.value)}>
+                  {BLOOD_GROUPS.map(bg => <option key={bg}>{bg}</option>)}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('phone')} (Primary Identifier)</label>
+                <input className="form-input" type="tel" placeholder="+91 98765 43210" value={form.phone} onChange={e => set('phone', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('email')} (Alternate / Optional)</label>
+                <input className="form-input" type="email" placeholder="you@email.com" value={form.email} onChange={e => set('email', e.target.value)} />
+              </div>
+              <div className="sec-divider">{t('preferences')}</div>
+              <div className="form-group">
+                <label className="form-label">{t('language')}</label>
+                <select className="form-input form-select" value={form.language} onChange={e => set('language', e.target.value)}>
+                  {['English', 'Hindi', 'Telugu'].sort().map(v => <option key={v}>{v}</option>)}
+                </select>
+              </div>
+
+            </>}
+
+            {/* ── LOGIN FORM ── */}
+            {step === 'login' && <>
+              <div className="sec-divider">account credentials</div>
+            </>}
+
+            {/* Email/Phone & Password (shared by login and register) */}
+            {isMainStep && <>
+              {step === 'login' && (
+                <div className="form-group">
+                  <label className="form-label">{t('email')} / {t('phone')}</label>
+                  <input className="form-input" type="text" placeholder="Email or Phone number" value={form.loginId} onChange={e => set('loginId', e.target.value)} />
+                </div>
+              )}
+              <div className="form-group" style={{ marginBottom: step === 'login' ? 8 : 22 }}>
+                <label className="form-label">{t('password')}</label>
+                <div className="pw-wrap">
+                  <input className="form-input" type={showPw ? 'text' : 'password'} placeholder="Enter your password"
+                    value={form.password} onChange={e => set('password', e.target.value)} onKeyDown={e => e.key === 'Enter' && submit()} />
+                  <button className="pw-eye" type="button" onClick={() => setShowPw(p => !p)}>{showPw ? '🙈' : '👁️'}</button>
+                </div>
+              </div>
+              {step === 'login' && (
+                <div style={{ textAlign: 'right', marginBottom: 18 }}>
+                  <span className="forgot-link" onClick={() => { setStep('forgot'); setError(''); }}>
+                    🔑 {t('forgotPassword')}
+                  </span>
+                </div>
+              )}
+              <button className="btn-primary" onClick={submit}>{step === 'login' ? t('signIn') + ' →' : t('createAccount') + ' →'}</button>
+            </>}
+
+            {/* ── OTP SCREENS ── */}
+            {(step === 'otp-register' || step === 'otp-login' || step === 'otp-reset') && renderOtpScreen()}
+
+            {/* ── FORGOT PASSWORD ── */}
+            {step === 'forgot' && <>
+              <button className="auth-back" onClick={() => { setStep('login'); setError(''); }}>
+                {t('backToLogin')}
+              </button>
+              <div style={{ textAlign: 'center', fontSize: 48, marginBottom: 8 }}>🔑</div>
+              <div className="otp-title">{t('forgotPassword')}</div>
+              <div className="otp-sub">Enter your registered email or phone to receive a verification code.</div>
+              {error && <div className="error-msg">⚠ {error}</div>}
+              <div className="form-group" style={{ marginTop: 20 }}>
+                <label className="form-label">{t('email')} / {t('phone')}</label>
+                <input className="form-input" type="text" placeholder="Email or Phone number" value={form.loginId || form.phone}
+                  onChange={e => { set('loginId', e.target.value); set('phone', e.target.value); }} onKeyDown={e => e.key === 'Enter' && sendForgotOtp()} />
+              </div>
+              <button className="btn-primary" onClick={sendForgotOtp}>{t('sendOtp')} →</button>
+            </>}
+
+            {/* ── NEW PASSWORD ── */}
+            {step === 'new-password' && <>
+              <button className="auth-back" onClick={() => { setStep('login'); setError(''); }}>
+                {t('backToLogin')}
+              </button>
+              <div style={{ textAlign: 'center', fontSize: 48, marginBottom: 8 }}>🔒</div>
+              <div className="otp-title">{t('resetPassword')}</div>
+              <div className="otp-sub">Create a new password for <strong>{form.email}</strong></div>
+              {error && <div className="error-msg">⚠ {error}</div>}
+              <div className="form-group" style={{ marginTop: 20 }}>
+                <label className="form-label">{t('newPassword')}</label>
+                <input className="form-input" type="password" placeholder="New password" value={newPw}
+                  onChange={e => setNewPw(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('confirmPassword')}</label>
+                <input className="form-input" type="password" placeholder="Confirm password" value={confirmPw}
+                  onChange={e => setConfirmPw(e.target.value)} onKeyDown={e => e.key === 'Enter' && resetPassword()} />
+              </div>
+              <button className="btn-primary" onClick={resetPassword}>{t('resetPassword')} →</button>
+            </>}
+          </div>
+
+          {/* Auth-local toasts */}
+          <div className="toast-wrap">
+            {toasts.map(t => (
+              <div key={t.id} className={`toast toast-${t.type}`}>{t.msg}</div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ═══════════════════════════════════════════
+    //  DASHBOARD
+    // ═══════════════════════════════════════════
+    function DashboardPage({ user, store, t }) {
+      const taken = store.reminders.filter(r => r.status === 'taken').length;
+      const missed = store.reminders.filter(r => r.status === 'missed').length;
+      const total = taken + missed;
+      const adherence = total > 0 ? Math.round((taken / total) * 100) : 100;
+      const risk = calcRisk(store.diseases, user.age || 30);
+      const trend = React.useMemo(() => mockTrend(), []);
+      const pending = store.reminders.filter(r => r.status === 'pending').length;
+
+      return <>
+        <div className="page-title">{t('healthOverview')}</div>
+        <div className="page-sub">
+          {t('welcomeBack')}, {user.name} &nbsp;·&nbsp; {t('age')} {user.age} &nbsp;·&nbsp;
+          <span style={{ color: '#4d8eff' }}>🩸 {user.blood_group}</span>
+        </div>
+        <div className="stats-grid">
+          {[
+            { icon: '💊', value: store.medicines.filter(m => m.active).length, label: t('activeMeds'), delta: 'Currently prescribed', cls: 'delta-good', bg: '#00e5b8' },
+            { icon: '🩺', value: store.diseases.length, label: t('conditions'), delta: 'Diagnosed conditions', cls: 'delta-good', bg: '#4d8eff' },
+            { icon: '📋', value: store.reports.length, label: t('reportsUploaded'), delta: 'Medical documents', cls: 'delta-good', bg: '#c77dff' },
+            { icon: '✅', value: adherence + '%', label: t('medAdherence'), delta: adherence >= 80 ? 'Great compliance' : 'Needs improvement', cls: adherence >= 80 ? 'delta-good' : 'delta-warn', bg: '#ffb830' },
+          ].map((s, i) => (
+            <div key={i} className="stat-card">
+              <div className="stat-glow" style={{ background: s.bg }} />
+              <div className="stat-icon">{s.icon}</div>
+              <div className="stat-value">{s.value}</div>
+              <div className="stat-label">{s.label}</div>
+              <div className={`stat-delta ${s.cls}`}>{s.delta}</div>
+            </div>))}
+        </div>
+        <div className="two-col">
+          <div className="card">
+            <div className="card-title">📈 {t('trend')}</div>
+            <div className="chart-wrap"><AdherenceChart data={trend} /></div>
+          </div>
+          <div className="card">
+            <div className="card-title">⚠️ {t('riskScore')}</div>
+            <RiskGauge {...risk} />
+          </div>
+        </div>
+        <div className="two-col">
+          <div className="card">
+            <div className="card-title">💊 {t('activeMeds')}</div>
+            {store.medicines.filter(m => m.active).length === 0
+              ? <div className="empty-state"><div className="empty-icon">💊</div><div className="empty-text">No medicines added yet</div></div>
+              : <table className="data-table"><thead><tr><th>{t('medicines')}</th><th>{t('dosage')}</th><th>{t('times')}</th></tr></thead>
+                <tbody>{store.medicines.filter(m => m.active).map(m => (
+                  <tr key={m.id}><td style={{ fontWeight: 500 }}>{m.name}</td>
+                    <td><span className="badge badge-blue">{m.dosage}</span></td>
+                    <td style={{ color: 'var(--muted)', fontSize: 12 }}>{m.times?.join(', ')}</td>
+                  </tr>))}</tbody></table>}
+          </div>
+          <div className="card">
+            <div className="card-title">🩺 {t('conditions')}</div>
+            {store.diseases.length === 0
+              ? <div className="empty-state"><div className="empty-icon">🩺</div><div className="empty-text">No conditions logged yet</div></div>
+              : <table className="data-table"><thead><tr><th>Condition</th><th>Severity</th><th>Since</th></tr></thead>
+                <tbody>{store.diseases.map(d => (
+                  <tr key={d.id}><td style={{ fontWeight: 500 }}>{d.disease_name}</td>
+                    <td><span className={`badge ${d.severity === 'mild' ? 'badge-green' : d.severity === 'severe' ? 'badge-red' : 'badge-amber'}`}>{d.severity}</span></td>
+                    <td style={{ color: 'var(--muted)', fontSize: 12 }}>{d.diagnosed_date}</td>
+                  </tr>))}</tbody></table>}
+          </div>
+        </div>
+      </>;
+    }
+
+    // ═══════════════════════════════════════════
+    //  MEDICINES
+    // ═══════════════════════════════════════════
+    function MedicinesPage({ store, onSave, toast, t }) {
+      const [showAdd, setShowAdd] = React.useState(false);
+      const [form, setForm] = React.useState({ name: '', dosage: '', start: '', end: '', time: '' });
+      const [times, setTimes] = React.useState([]);
+      const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+      const addTime = () => { if (form.time && !times.includes(form.time)) { setTimes(p => [...p, form.time].sort()); set('time', ''); } };
+      const save = () => {
+        if (!form.name || !form.dosage || times.length === 0) { toast('Name, dosage and at least one time required', 'err'); return; }
+        const id = store.nextId;
+        const newMed = { id, name: form.name, dosage: form.dosage, times, start: form.start, end: form.end, active: true };
+        const newRems = times.map((t, i) => ({ id: store.nextId + 1 + i, medicine: form.name, dosage: form.dosage, time: t, status: 'pending' }));
+        onSave({ ...store, nextId: store.nextId + 1 + times.length, medicines: [...store.medicines, newMed], reminders: [...store.reminders, ...newRems] });
+        toast('✓ Medicine saved & reminders created!');
+        setShowAdd(false); setForm({ name: '', dosage: '', start: '', end: '', time: '' }); setTimes([]);
+      };
+      const remove = (id) => { onSave({ ...store, medicines: store.medicines.map(m => m.id === id ? { ...m, active: false } : m) }); toast('Medicine removed.'); };
+
+      return <>
+        <div className="page-hdr">
+          <div><div className="page-title">{t('medicines')}</div><div className="page-sub">Prescriptions & reminder schedule</div></div>
+          <button className="btn-accent" onClick={() => setShowAdd(p => !p)}>{showAdd ? '✕ Cancel' : '+ ' + t('addMed')}</button>
+        </div>
+        {showAdd && <div className="add-panel">
+          <div className="add-title">{t('newMed')}</div>
+          <div className="form-row">
+            <div className="form-group"><label className="form-label">{t('medName')}</label>
+              <input className="form-input" placeholder="e.g. Metformin" value={form.name} onChange={e => set('name', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">{t('dosage')}</label>
+              <input className="form-input" placeholder="e.g. 500mg" value={form.dosage} onChange={e => set('dosage', e.target.value)} /></div>
+          </div>
+          <div className="form-row">
+            <div className="form-group"><label className="form-label">{t('startDate')}</label>
+              <input className="form-input" type="date" value={form.start} onChange={e => set('start', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">{t('endDate')}</label>
+              <input className="form-input" type="date" value={form.end} onChange={e => set('endDate', e.target.value)} /></div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">{t('reminderTimes')}</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input className="form-input" type="time" value={form.time} onChange={e => set('time', e.target.value)} style={{ flex: 1 }} />
+              <button className="btn-ghost" onClick={addTime}>+ {t('addTime')}</button>
+            </div>
+            <div className="time-tags">{times.map(t_val => (
+              <div key={t_val} className="time-tag">{t_val}<button onClick={() => setTimes(p => p.filter(x => x !== t_val))}>×</button></div>))}</div>
+          </div>
+          <div className="btn-row"><button className="btn-accent" onClick={save}>{t('addMed')}</button></div>
+        </div>}
+        <div className="card">
+          {store.medicines.length === 0
+            ? <div className="empty-state"><div className="empty-icon">💊</div><div className="empty-text">No medicines yet.</div></div>
+            : <table className="data-table"><thead><tr><th>{t('medicines')}</th><th>{t('dosage')}</th><th>Schedule</th><th>{t('startDate')}</th><th>{t('endDate')}</th><th>{t('status')}</th><th></th></tr></thead>
+              <tbody>{store.medicines.map(m => (
+                <tr key={m.id}><td style={{ fontWeight: 500 }}>{m.name}</td>
+                  <td><span className="badge badge-blue">{m.dosage}</span></td>
+                  <td style={{ color: 'var(--muted)', fontSize: 12 }}>{m.times?.join(', ')}</td>
+                  <td style={{ color: 'var(--muted)', fontSize: 12 }}>{m.start || '—'}</td>
+                  <td style={{ color: 'var(--muted)', fontSize: 12 }}>{m.end || '∞'}</td>
+                  <td><span className={`badge ${m.active ? 'badge-green' : 'badge-red'}`}>{m.active ? 'Active' : 'Stopped'}</span></td>
+                  <td>{m.active && <button className="btn-danger" onClick={() => remove(m.id)}>Remove</button>}</td>
+                </tr>))}</tbody></table>}
+        </div>
+      </>;
+    }
+
+    // ═══════════════════════════════════════════
+    //  EC SMS ALERT MODAL
+    // ═══════════════════════════════════════════
+    function EcSmsAlert({ reminder, ec, user, type, onClose }) {
+      const isTaken = type === 'taken';
+      const msgBody = isTaken
+        ? 'Hi ' + ec.name + ', HealthVault update: ' + (user.name || 'Patient') + ' has TAKEN their medicine ✅ ' + reminder.medicine + ' (' + reminder.dosage + ') at ' + reminder.time + '. All good! - HealthVault'
+        : 'Hi ' + ec.name + ', HealthVault ALERT: ' + (user.name || 'Patient') + ' MISSED their medicine ⚠️ ' + reminder.medicine + ' (' + reminder.dosage + ') scheduled at ' + reminder.time + '. Please follow up urgently. - HealthVault';
+      const smsHref = 'sms:' + (ec.phone || '') + (navigator.userAgent.includes('iPhone') ? '&' : '?') + 'body=' + encodeURIComponent(msgBody);
+
+      React.useEffect(() => {
+        const fn = (e) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', fn);
+        return () => window.removeEventListener('keydown', fn);
+      }, []);
+
+      const accentColor = isTaken ? 'var(--success)' : 'var(--danger)';
+      const borderCol = isTaken ? 'rgba(42,232,143,.3)' : 'rgba(255,77,109,.3)';
+      const bgCol = isTaken ? 'linear-gradient(145deg,rgba(5,40,20,.98),rgba(2,20,10,.99))' : 'linear-gradient(145deg,rgba(46,10,20,.98),rgba(22,5,10,.99))';
+      const glowCol = isTaken ? 'rgba(42,232,143,.15)' : 'rgba(255,77,109,.15)';
+
+      return (
+        <div className="ec-alert-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+          <div className="ec-alert-modal" style={{ background: bgCol, borderColor: borderCol, boxShadow: '0 0 80px ' + glowCol + ', 0 30px 60px rgba(0,0,0,.7)' }}>
+            <span className="ec-alert-icon">{isTaken ? '✅' : '⚠️'}</span>
+            <div className="ec-alert-title" style={{ color: accentColor }}>{isTaken ? 'Medicine Taken — Notify EC?' : 'Medicine Missed!'}</div>
+            <div className="ec-alert-sub">
+              <strong style={{ color: 'var(--text)' }}>{reminder.medicine} ({reminder.dosage})</strong><br />
+              {isTaken ? 'Great! Inform your emergency contact this was taken.' : 'Scheduled at ' + reminder.time + ' — Notify your emergency contact?'}
+            </div>
+            <div className="ec-alert-contact" style={{ borderColor: isTaken ? 'rgba(42,232,143,.15)' : 'rgba(255,77,109,.15)', background: isTaken ? 'rgba(42,232,143,.04)' : 'rgba(255,77,109,.06)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div className="ec-alert-contact-name">{ec.name}</div>
+                  <div className="ec-alert-contact-detail">Emergency contact · {ec.relation}</div>
+                  <div className="ec-alert-phone" style={{ color: accentColor }}>{ec.phone}</div>
+                </div>
+                <div style={{ textAlign: 'right', fontSize: 12, color: 'var(--muted)', lineHeight: 1.6 }}>
+                  <div><strong style={{ color: 'var(--text)' }}>Patient</strong></div>
+                  <div>{user.name}</div>
+                  <div>🩸 {user.blood_group} · Age {user.age}</div>
+                </div>
+              </div>
+            </div>
+            <div className="ec-alert-actions">
+              <button className="btn-ghost" style={{ flex: 1 }} onClick={onClose}>Skip</button>
+              <a href={smsHref} className="btn-sms" onClick={onClose}
+                style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, textDecoration: 'none', background: isTaken ? 'linear-gradient(135deg,var(--success),#16a874)' : undefined }}>
+                📲 Send SMS to {ec.name}
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ═══════════════════════════════════════════
+    //  REMINDERS
+    // ═══════════════════════════════════════════
+    function RemindersPage({ user, store, onSave, toast, t }) {
+      const [notifStatus, setNotifStatus] = React.useState(() =>
+        'Notification' in window ? Notification.permission : 'unsupported'
+      );
+      const [ecAlert, setEcAlert] = React.useState(null); // { reminder, type }
+      const firedRef = React.useRef(new Set());
+
+      const ec = store.medInfo?.emergencyContact;
+      const hasEc = ec && ec.name && ec.phone;
+
+      // ⏰ Auto-scheduler: check every 30 seconds if a pending reminder’s time matches now
+      React.useEffect(() => {
+        const check = () => {
+          const now = new Date();
+          const hhmm = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+          store.reminders.forEach(r => {
+            if (r.status === 'pending' && r.time === hhmm && !firedRef.current.has(r.id)) {
+              firedRef.current.add(r.id);
+              Notify.send(
+                '💊 Time to take ' + r.medicine,
+                r.dosage + ' — ' + (user.name || 'Patient') + ' — Open HealthVault to confirm.'
+              );
+              toast('🔔 Reminder: ' + r.medicine + ' ' + r.dosage + ' is due now!', 'info');
+            }
+          });
+        };
+        check();
+        const id = setInterval(check, 30000);
+        return () => clearInterval(id);
+      }, [store.reminders]);
+
+      const requestNotif = async () => {
+        const perm = await Notify.request();
+        setNotifStatus(perm);
+        if (perm === 'granted') toast('🔔 Push notifications enabled!', 'ok');
+      };
+
+      const openSmsDirect = (reminder, type) => {
+        if (!hasEc) { toast('⚠️ Add an emergency contact in Profile > Medical Info.', 'err'); return; }
+        const isTaken = type === 'taken';
+        const body = isTaken
+          ? 'Hi ' + ec.name + ', HealthVault: ' + (user.name || 'Patient') + ' took ' + reminder.medicine + ' (' + reminder.dosage + ') at ' + reminder.time + '. ✅ - HealthVault'
+          : 'Hi ' + ec.name + ', HealthVault ALERT: ' + (user.name || 'Patient') + ' missed ' + reminder.medicine + ' (' + reminder.dosage + ') at ' + reminder.time + '. ⚠️ Please follow up - HealthVault';
+        const href = 'sms:' + ec.phone + (navigator.userAgent.includes('iPhone') ? '&' : '?') + 'body=' + encodeURIComponent(body);
+        window.open(href, '_blank');
+      };
+
+      const update = (id, status) => {
+        const rem = store.reminders.find(r => r.id === id);
+        onSave({ ...store, reminders: store.reminders.map(r => r.id === id ? { ...r, status } : r) });
+
+        if (status === 'taken') {
+          // Push notification to user with full details
+          Notify.send(
+            '✅ Medicine Taken — ' + (rem?.medicine || ''),
+            'Patient: ' + (user.name || '') + ' | Blood: ' + (user.blood_group || '') + ' | Dose: ' + (rem?.dosage || '') + ' at ' + (rem?.time || '') + (hasEc ? ' | EC: ' + ec.name + ' ✔' : '')
+          );
+          toast('✅ ' + (rem?.medicine || 'Medicine') + ' marked as taken!', 'ok');
+          // Offer to notify EC that patient took meds
+          if (hasEc && rem) setEcAlert({ reminder: rem, type: 'taken' });
+        } else {
+          // Push notification to user
+          Notify.send(
+            '⚠️ Medicine Missed — ' + (rem?.medicine || ''),
+            'Patient: ' + (user.name || '') + ' | Dose: ' + (rem?.dosage || '') + ' at ' + (rem?.time || '') + (hasEc ? ' | Notifying EC: ' + ec.name : '')
+          );
+          toast('❌ ' + (rem?.medicine || 'Medicine') + ' missed. Notifying emergency contact…', 'err');
+          // Immediately show EC alert for missed
+          if (hasEc && rem) setEcAlert({ reminder: rem, type: 'missed' });
+        }
+      };
+
+      const pending = store.reminders.filter(r => r.status === 'pending');
+      const done = store.reminders.filter(r => r.status !== 'pending');
+
+      return <>
+        {ecAlert && <EcSmsAlert reminder={ecAlert.reminder} ec={ec} user={user} type={ecAlert.type} onClose={() => setEcAlert(null)} />}
+
+        <div className="page-title">{t('reminders')}</div>
+        <div className="page-sub">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+
+        {/* Notification permission banner */}
+        {notifStatus !== 'granted' && notifStatus !== 'unsupported' && notifStatus !== 'denied' && (
+          <div className="notif-banner">
+            <div className="notif-banner-icon">🔔</div>
+            <div className="notif-banner-text">
+              <strong style={{ color: 'var(--text)' }}>Enable push notifications</strong><br />
+              Get phone alerts exactly when it's time to take medicine.
+            </div>
+            <button className="notif-banner-btn" onClick={requestNotif}>Enable</button>
+          </div>
+        )}
+        {notifStatus === 'denied' && (
+          <div className="notif-banner" style={{ borderColor: 'rgba(255,77,109,.2)' }}>
+            <div className="notif-banner-icon">❌</div>
+            <div className="notif-banner-text" style={{ color: 'var(--danger)' }}>Notifications blocked by browser. Enable in Settings → Notifications.</div>
+          </div>
+        )}
+        {!hasEc && (
+          <div className="notif-banner" style={{ borderColor: 'rgba(255,203,71,.25)', background: 'rgba(255,203,71,.04)' }}>
+            <div className="notif-banner-icon">📱</div>
+            <div className="notif-banner-text">
+              <strong style={{ color: 'var(--text)' }}>Set up emergency contact for SMS alerts</strong><br />
+              Go to Profile → Medical Info → Emergency Contact.
+            </div>
+          </div>
+        )}
+
+        {/* Summary row */}
+        {store.reminders.length > 0 && (
+          <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+            {[
+              { label: 'Pending', val: pending.length, color: 'var(--warn)' },
+              { label: 'Taken', val: done.filter(r => r.status === 'taken').length, color: 'var(--success)' },
+              { label: 'Missed', val: done.filter(r => r.status === 'missed').length, color: 'var(--danger)' },
+            ].map(s => (
+              <div key={s.label} style={{ flex: 1, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 16px', textAlign: 'center' }}>
+                <div style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-head)', color: s.color }}>{s.val}</div>
+                <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {store.reminders.length === 0 && <div className="card"><div className="empty-state"><div className="empty-icon">🔔</div><div className="empty-text">Add medicines to generate reminders.</div></div></div>}
+
+        {pending.length > 0 && <div className="card" style={{ marginBottom: 14 }}>
+          <div className="card-title">⏰ Pending — {pending.length}</div>
+          <div className="reminder-grid">{pending.map(r => (
+            <div key={r.id} className="reminder-item">
+              <div className="rem-time">{r.time}</div>
+              <div className="rem-info"><div className="rem-name">{r.medicine}</div><div className="rem-dose">{r.dosage}</div></div>
+              <button className="rem-btn rem-taken" onClick={() => update(r.id, 'taken')}>✓ Taken</button>
+              <button className="rem-btn rem-miss" onClick={() => update(r.id, 'missed')}>✗ Miss</button>
+            </div>))}</div>
+        </div>}
+
+        {done.length > 0 && <div className="card">
+          <div className="card-title">📊 History — {done.length}</div>
+          <div className="reminder-grid">{done.map(r => (
+            <div key={r.id} className="reminder-item" style={{ opacity: r.status === 'missed' ? 1 : .65 }}>
+              <div className="rem-time" style={{ color: r.status === 'missed' ? 'var(--danger)' : r.status === 'taken' ? 'var(--success)' : 'var(--muted)' }}>{r.time}</div>
+              <div className="rem-info"><div className="rem-name">{r.medicine}</div><div className="rem-dose">{r.dosage}</div></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                <div style={{ color: r.status === 'taken' ? 'var(--success)' : 'var(--danger)', fontSize: 12, fontWeight: 700 }}>
+                  {r.status === 'taken' ? '✓ Taken' : '✗ Missed'}
+                </div>
+                {hasEc && (
+                  <button className="rem-btn-notify" onClick={() => openSmsDirect(r, r.status)}
+                    style={{
+                      background: r.status === 'taken' ? 'rgba(42,232,143,.08)' : undefined,
+                      color: r.status === 'taken' ? 'var(--success)' : undefined,
+                      borderColor: r.status === 'taken' ? 'rgba(42,232,143,.25)' : undefined
+                    }}>
+                    📲 SMS EC
+                  </button>
+                )}
+              </div>
+            </div>))}
+          </div>
+        </div>}
+      </>;
+    }
+
+    // ═══════════════════════════════════════════
+    //  REPORTS  (multi-file: image, pdf, txt, doc)
+    // ═══════════════════════════════════════════
+    function ReportsPage({ store, onSave, toast, t }) {
+      const [analyzing, setAnalyzing] = React.useState(false);
+      const [dragOver, setDragOver] = React.useState(false);
+      const fileRef = React.useRef(null);
+
+      const processFile = (file) => {
+        return new Promise((resolve) => {
+          const fi = getFileIcon(file.name);
+          const base = { id: store.nextId + Math.floor(Math.random() * 1000), filename: file.name, date: new Date().toISOString().slice(0, 10), fileType: fi.label, fileColor: fi.color };
+          if (isImage(file.name)) {
+            const reader = new FileReader();
+            reader.onload = (ev) => resolve({ ...base, imageData: ev.target.result, extracted: { diseases_detected: [], medicines_detected: [], test_results: {} } });
+            reader.readAsDataURL(file);
+          } else {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              const text = ev.target.result || '';
+              resolve({ ...base, extracted: extractFromText(text) });
+            };
+            reader.readAsText(file);
+          }
+        });
+      };
+
+      const handleFiles = async (files) => {
+        if (!files || files.length === 0) return;
+        setAnalyzing(true);
+        try {
+          await new Promise(r => setTimeout(r, 1200));
+          const results = await Promise.all(Array.from(files).map(processFile));
+          const updated = { ...store, nextId: store.nextId + results.length * 2, reports: [...results, ...store.reports] };
+          onSave(updated);
+          const imgCount = results.filter(r => r.imageData).length;
+          const docCount = results.length - imgCount;
+          const parts = [];
+          if (imgCount) parts.push(`${imgCount} image(s)`);
+          if (docCount) parts.push(`${docCount} document(s)`);
+          toast(`✓ Uploaded ${parts.join(' + ')} successfully`);
+        } catch (e) { toast('Upload failed', 'err'); }
+        setAnalyzing(false);
+        if (fileRef.current) fileRef.current.value = '';
+      };
+
+      const handleInput = (e) => handleFiles(e.target.files);
+      const handleDrop = (e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); };
+      const removeReport = (id) => { onSave({ ...store, reports: store.reports.filter(r => r.id !== id) }); toast('Report removed.'); };
+
+      return <>
+        <div className="page-title">{t('reports')}</div>
+        <div className="page-sub">Upload and AI-analyze health documents, scans & images</div>
+        <div className="card" style={{ marginBottom: 20 }}>
+          <div className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
+            onClick={() => !analyzing && fileRef.current.click()}
+            onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}>
+            <input ref={fileRef} type="file" accept="image/*,.pdf,.txt,.doc,.docx,.xls,.xlsx" multiple style={{ display: 'none' }} onChange={handleInput} />
+            <div className="upload-icon">{analyzing ? '⏳' : '📂'}</div>
+            <div className="upload-text">{analyzing ? 'Analyzing uploaded files…' : 'Upload Medical Files'}</div>
+            <div className="upload-sub">{analyzing ? 'AI is extracting health data from your documents…' : 'Click to browse or drag & drop multiple files at once'}</div>
+            <div className="file-types">
+              {['🖼️ Images', '📄 PDF', '📝 Word', '📊 Excel', '📃 Text'].map(t_chip => (
+                <span key={t_chip} className="file-type-chip">{t_chip}</span>))}
+            </div>
+          </div>
+        </div>
+
+        {store.reports.length === 0 && <div className="card"><div className="empty-state"><div className="empty-icon">📋</div><div className="empty-text">No reports yet. Upload your first document above.</div></div></div>}
+
+        {store.reports.map(r => {
+          const fi = getFileIcon(r.filename);
+          return (
+            <div key={r.id} className="report-card">
+              <div className="report-hdr">
+                <div className="report-left">
+                  <div className="report-file-icon" style={{ background: `${fi.color}18` }}>{fi.icon}</div>
+                  <div>
+                    <div className="report-name">{r.filename}</div>
+                    <div className="report-date">{r.date} &nbsp;·&nbsp; <span style={{ color: fi.color, fontWeight: 600 }}>{r.fileType || fi.label}</span></div>
+                  </div>
+                </div>
+                <button className="btn-danger" onClick={() => removeReport(r.id)}>Remove</button>
+              </div>
+              {r.imageData && <img src={r.imageData} alt={r.filename} className="img-preview" />}
+              {r.extracted && !r.imageData && <div className="extracted-grid">
+                <div className="extracted-item"><div className="ext-label">Diseases Detected</div>
+                  <div className="ext-value" style={{ color: 'var(--accent)' }}>{r.extracted.diseases_detected?.join(', ') || 'None detected'}</div></div>
+                <div className="extracted-item"><div className="ext-label">Medicines Detected</div>
+                  <div className="ext-value" style={{ color: 'var(--accent2)' }}>{r.extracted.medicines_detected?.join(', ') || 'None detected'}</div></div>
+                <div className="extracted-item"><div className="ext-label">Lab Results</div>
+                  <div className="ext-value" style={{ color: 'var(--warn)', fontSize: 11 }}>{Object.entries(r.extracted.test_results || {}).map(([k, v]) => `${k}: ${v}`).join(' · ') || 'None detected'}</div></div>
+              </div>}
+              {r.imageData && <div style={{ fontSize: 12, color: 'var(--muted)', background: 'var(--surface)', borderRadius: 8, padding: '8px 12px' }}>
+                🖼️ Image uploaded and stored. In production, OCR would extract text data from this scan.
+              </div>}
+            </div>);
+        })}
+      </>;
+    }
+
+    // ═══════════════════════════════════════════
+    //  CONDITIONS
+    // ═══════════════════════════════════════════
+    function DiseasesPage({ store, onSave, toast, t }) {
+      const [showAdd, setShowAdd] = React.useState(false);
+      const [form, setForm] = React.useState({ name: '', date: '', severity: 'moderate' });
+      const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+      const save = () => {
+        if (!form.name || !form.date) { toast('Name and date required', 'err'); return; }
+        onSave({ ...store, nextId: store.nextId + 1, diseases: [...store.diseases, { id: store.nextId, disease_name: form.name, diagnosed_date: form.date, severity: form.severity }] });
+        toast('✓ Condition saved.'); setShowAdd(false); setForm({ name: '', date: '', severity: 'moderate' });
+      };
+      const remove = (id) => { onSave({ ...store, diseases: store.diseases.filter(d => d.id !== id) }); toast('Condition removed.'); };
+      return <>
+        <div className="page-hdr">
+          <div><div className="page-title">{t('conditions')}</div><div className="page-sub">Track diagnosed medical conditions</div></div>
+          <button className="btn-accent" onClick={() => setShowAdd(p => !p)}>{showAdd ? '✕ Cancel' : '+ ' + t('addCondition')}</button>
+        </div>
+        {showAdd && <div className="add-panel">
+          <div className="add-title">{t('addCondition')}</div>
+          <div className="form-row">
+            <div className="form-group"><label className="form-label">{t('conditionName')}</label>
+              <input className="form-input" placeholder="e.g. Type 2 Diabetes" value={form.name} onChange={e => set('name', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">{t('diagnosisDate')}</label>
+              <input className="form-input" type="date" value={form.date} onChange={e => set('date', e.target.value)} /></div>
+          </div>
+          <div className="form-group"><label className="form-label">{t('severity')}</label>
+            <select className="form-input form-select" value={form.severity} onChange={e => set('severity', e.target.value)}>
+              <option value="mild">{t('mild')}</option><option value="moderate">{t('moderate')}</option><option value="severe">{t('severe')}</option>
+            </select></div>
+          <div className="btn-row"><button className="btn-accent" onClick={save}>{t('addCondition')}</button></div>
+        </div>}
+        <div className="card">
+          {store.diseases.length === 0 ? <div className="empty-state"><div className="empty-icon">🩺</div><div className="empty-text">No conditions recorded.</div></div>
+            : <table className="data-table"><thead><tr><th>{t('conditions')}</th><th>{t('diagnosedAt')}</th><th>{t('severity')}</th><th></th></tr></thead>
+              <tbody>{store.diseases.map(d => (
+                <tr key={d.id}><td style={{ fontWeight: 500 }}>{d.disease_name}</td>
+                  <td style={{ color: 'var(--muted)' }}>{d.diagnosed_date}</td>
+                  <td><span className={`badge ${d.severity === 'mild' ? 'badge-green' : d.severity === 'severe' ? 'badge-red' : 'badge-amber'}`}>{t(d.severity)}</span></td>
+                  <td><button className="btn-danger" onClick={() => remove(d.id)}>{t('remove')}</button></td>
+                </tr>))}</tbody></table>}
+        </div>
+      </>;
+    }
+
+    // ═══════════════════════════════════════════
+    //  PROFILE PAGE  (personal info + med info + settings)
+    // ═══════════════════════════════════════════
+    function ProfilePage({ user, setUser, store, onSave, onLogout, toast, t }) {
+
+      const [activeTab, setActiveTab] = React.useState('personal');
+      const [editing, setEditing] = React.useState(false);
+      const [profileForm, setProfileForm] = React.useState({ ...user });
+      const pset = (k, v) => setProfileForm(p => ({ ...p, [k]: v }));
+
+      // Med info
+      const medInfo = store.medInfo || { allergies: [], surgeries: [], familyHistory: [], vaccinations: [], emergencyContact: { name: '', phone: '', relation: '' } };
+      const [newAllergy, setNewAllergy] = React.useState('');
+      const [newSurgery, setNewSurgery] = React.useState('');
+      const [newFH, setNewFH] = React.useState('');
+      const [newVacc, setNewVacc] = React.useState('');
+      const [ecForm, setEcForm] = React.useState({ ...medInfo.emergencyContact });
+      const [showQR, setShowQR] = React.useState(false);
+
+      // Settings
+      const settings = store.settings || { emailReminders: true, smsReminders: false, pushNotifications: true, reminderAdvance: '30min', theme: 'dark', language: 'English', voice: 'Auto', units: 'metric', shareData: false };
+      const [sett, setSett] = React.useState({ ...settings });
+
+      const stgl = (k) => setSett(p => ({ ...p, [k]: !p[k] }));
+      const sset = (k, v) => setSett(p => ({ ...p, [k]: v }));
+
+      const saveProfile = () => {
+        const accounts = LS.get('accounts', {});
+        accounts[user.email] = { ...accounts[user.email], ...profileForm };
+        LS.set('accounts', accounts);
+        LS.set('session', { ...user, ...profileForm });
+        setUser({ ...user, ...profileForm });
+        setEditing(false);
+        toast('✓ Profile updated!');
+      };
+
+      const savePhoto = (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const photo = ev.target.result;
+          const accounts = LS.get('accounts', {});
+          accounts[user.email] = { ...accounts[user.email], photo };
+          LS.set('accounts', accounts); LS.set('session', { ...user, photo });
+          setUser(p => ({ ...p, photo })); setProfileForm(p => ({ ...p, photo }));
+          toast('✓ Profile photo updated!');
+        };
+        reader.readAsDataURL(file);
+      };
+
+      const addAllergy = () => {
+        if (!newAllergy.trim()) return;
+        const updated = { ...store, medInfo: { ...medInfo, allergies: [...medInfo.allergies, newAllergy.trim()] } };
+        onSave(updated); setNewAllergy(''); toast('Allergy added.');
+      };
+      const removeAllergy = (i) => {
+        const arr = [...medInfo.allergies]; arr.splice(i, 1);
+        onSave({ ...store, medInfo: { ...medInfo, allergies: arr } });
+      };
+      const addSurgery = () => {
+        if (!newSurgery.trim()) return;
+        onSave({ ...store, medInfo: { ...medInfo, surgeries: [...medInfo.surgeries, newSurgery.trim()] } }); setNewSurgery(''); toast('Surgery record added.');
+      };
+      const removeSurgery = (i) => {
+        const arr = [...medInfo.surgeries]; arr.splice(i, 1); onSave({ ...store, medInfo: { ...medInfo, surgeries: arr } });
+      };
+      const addFH = () => {
+        if (!newFH.trim()) return;
+        onSave({ ...store, medInfo: { ...medInfo, familyHistory: [...medInfo.familyHistory, newFH.trim()] } }); setNewFH(''); toast('Family history added.');
+      };
+      const removeFH = (i) => {
+        const arr = [...medInfo.familyHistory]; arr.splice(i, 1); onSave({ ...store, medInfo: { ...medInfo, familyHistory: arr } });
+      };
+      const addVacc = () => {
+        if (!newVacc.trim()) return;
+        onSave({ ...store, medInfo: { ...medInfo, vaccinations: [...medInfo.vaccinations, newVacc.trim()] } }); setNewVacc(''); toast('Vaccination added.');
+      };
+      const removeVacc = (i) => {
+        const arr = [...medInfo.vaccinations]; arr.splice(i, 1); onSave({ ...store, medInfo: { ...medInfo, vaccinations: arr } });
+      };
+      const saveEC = () => {
+        onSave({ ...store, medInfo: { ...medInfo, emergencyContact: { ...ecForm } } });
+        setShowQR(true);
+        toast('✓ Emergency contact saved & QR generated.', 'info');
+      };
+      const saveSettings = () => {
+        onSave({ ...store, settings: { ...sett } }); toast('✓ ' + t('settingsSaved'));
+      };
+
+      const photoRef = React.useRef(null);
+
+      const TABS = [
+        { id: 'personal', label: '👤 ' + t('personal') },
+        { id: 'medical', label: '🏥 ' + t('medical') },
+        { id: 'settings', label: '⚙️ ' + t('settings') },
+      ];
+
+      return <>
+        {/* Hero */}
+        <div className="profile-hero">
+          <div className="profile-hero-row">
+            <div className="profile-avatar-wrap" onClick={() => photoRef.current.click()} title="Change photo">
+              <div className="profile-avatar">
+                {user.photo ? <img src={user.photo} alt="avatar" /> : user.name?.[0]?.toUpperCase()}
+              </div>
+              <div className="avatar-edit">✏️</div>
+              <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={savePhoto} />
+            </div>
+            <div className="profile-headline">
+              <div className="profile-display-name">{user.name}</div>
+              <div style={{ color: 'var(--muted)', fontSize: 13 }}>{user.email}</div>
+              <div className="profile-tags">
+                <span className="badge badge-teal">🩸 {user.blood_group}</span>
+                <span className="badge badge-blue">{t('age')} {user.age}</span>
+                <span className="badge badge-purple">{user.gender}</span>
+                {user.occupation && <span className="badge" style={{ background: 'rgba(255,184,48,.1)', color: 'var(--warn)' }}>💼 {user.occupation}</span>}
+              </div>
+            </div>
+            {!editing && <button className="profile-edit-btn" onClick={() => setEditing(true)}>✏️ {t('editProfile') || 'Edit Profile'}</button>}
+            {editing && <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn-accent" onClick={saveProfile}>{t('save') || 'Save'}</button>
+              <button className="btn-ghost" onClick={() => { setEditing(false); setProfileForm({ ...user }); }}>{t('cancel') || 'Cancel'}</button>
+            </div>}
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="profile-tabs">
+          {TABS.map(t => <button key={t.id} className={`profile-tab ${activeTab === t.id ? 'active' : ''}`} onClick={() => setActiveTab(t.id)}>{t.label}</button>)}
+        </div>
+
+        {/* ── PERSONAL TAB ── */}
+        {activeTab === 'personal' && <>
+          <div className="card" style={{ marginBottom: 14 }}>
+            <div className="card-title">👤 {t('personalInfo')}</div>
+            <div className="info-grid">
+              {[
+                { label: t('fullName'), key: 'name', placeholder: 'Your full name' },
+                { label: 'Email', key: 'email', placeholder: 'Email address', disabled: true },
+                { label: t('age'), key: 'age', placeholder: 'Age', type: 'number' },
+                { label: t('gender'), key: 'gender', type: 'select', opts: ['male', 'female', 'other'] },
+                { label: t('bloodGroup'), key: 'blood_group', type: 'select', opts: BLOOD_GROUPS },
+                { label: t('phone'), key: 'phone', placeholder: '+91 98765 43210' },
+                { label: t('occupation'), key: 'occupation', placeholder: 'e.g. Software Engineer' },
+                { label: t('address'), key: 'address', placeholder: 'City, State' },
+              ].map(f => (
+                <div key={f.key} className="info-field">
+                  <div className="info-field-label">{f.label}</div>
+                  {!editing
+                    ? <div className="info-field-val">{profileForm[f.key] || <span style={{ color: 'var(--muted)' }}>{t('notSet')}</span>}</div>
+                    : f.type === 'select'
+                      ? <select className="info-field-val editing form-select" style={{ width: '100%', background: 'transparent' }}
+                        value={profileForm[f.key] || ''} onChange={e => pset(f.key, e.target.value)}>
+                        {f.opts.map(o => <option key={o}>{t(o)}</option>)}</select>
+                      : <input className="info-field-val editing" type={f.type || 'text'} placeholder={f.placeholder}
+                        disabled={f.disabled} value={profileForm[f.key] || ''} onChange={e => pset(f.key, e.target.value)} />}
+                </div>))}
+            </div>
+            {editing && <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 4 }}>Click "Save" in the header to apply changes</div>}
+          </div>
+
+          {/* Account summary */}
+          <div className="card">
+            <div className="card-title">📊 {t('accountSummary')}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
+              {[
+                { label: 'Medicines', value: store.medicines.filter(m => m.active).length, icon: '💊' },
+                { label: 'Conditions', value: store.diseases.length, icon: '🩺' },
+                { label: 'Reports', value: store.reports.length, icon: '📋' },
+              ].map(s => (
+                <div key={s.label} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 24, marginBottom: 6 }}>{s.icon}</div>
+                  <div style={{ fontFamily: 'var(--font-head)', fontSize: 22, fontWeight: 800 }}>{s.value}</div>
+                  <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 3 }}>{s.label}</div>
+                </div>))}
+            </div>
+          </div>
+        </>}
+
+        {/* ── MEDICAL INFO TAB ── */}
+        {activeTab === 'medical' && <>
+          {/* Allergies */}
+          <div className="med-info-card">
+            <div className="med-info-title">⚠️ {t('allergies')}</div>
+            <div>{medInfo.allergies.map((a, i) => (
+              <span key={i} className="allergy-tag">{a}<button onClick={() => removeAllergy(i)}>×</button></span>))}
+              {medInfo.allergies.length === 0 && <div style={{ color: 'var(--muted)', fontSize: 13 }}>No allergies recorded</div>}
+            </div>
+            <div className="tag-input-row">
+              <input className="form-input" placeholder="e.g. Penicillin, Peanuts…" value={newAllergy} onChange={e => setNewAllergy(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addAllergy()} style={{ flex: 1 }} />
+              <button className="btn-accent" onClick={addAllergy}>{t('add')}</button>
+            </div>
+          </div>
+
+          {/* Surgeries */}
+          <div className="med-info-card">
+            <div className="med-info-title">🏥 {t('surgeries')}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {medInfo.surgeries.map((s, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface)', borderRadius: 8, padding: '8px 12px', fontSize: 13 }}>
+                  <span>{s}</span><button className="btn-danger" onClick={() => removeSurgery(i)}>Remove</button>
+                </div>))}
+              {medInfo.surgeries.length === 0 && <div style={{ color: 'var(--muted)', fontSize: 13 }}>No surgeries recorded</div>}
+            </div>
+            <div className="tag-input-row">
+              <input className="form-input" placeholder="e.g. Appendectomy 2019…" value={newSurgery} onChange={e => setNewSurgery(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addSurgery()} style={{ flex: 1 }} />
+              <button className="btn-accent" onClick={addSurgery}>{t('add')}</button>
+            </div>
+          </div>
+
+          {/* Family History */}
+          <div className="med-info-card">
+            <div className="med-info-title">🧬 {t('familyHistory')}</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {medInfo.familyHistory.map((f, i) => (
+                <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(77,142,255,.08)', border: '1px solid rgba(77,142,255,.2)', color: 'var(--accent2)', borderRadius: 7, padding: '4px 10px', fontSize: 12 }}>
+                  {f}<button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 13, padding: 0, lineHeight: 1 }} onClick={() => removeFH(i)}>×</button>
+                </span>))}
+              {medInfo.familyHistory.length === 0 && <div style={{ color: 'var(--muted)', fontSize: 13 }}>No family history recorded</div>}
+            </div>
+            <div className="tag-input-row">
+              <input className="form-input" placeholder="e.g. Father — Diabetes…" value={newFH} onChange={e => setNewFH(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addFH()} style={{ flex: 1 }} />
+              <button className="btn-accent" onClick={addFH}>{t('add')}</button>
+            </div>
+          </div>
+
+          {/* Vaccinations */}
+          <div className="med-info-card">
+            <div className="med-info-title">💉 {t('vaccinations')}</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {medInfo.vaccinations.map((v, i) => (
+                <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(34,214,138,.08)', border: '1px solid rgba(34,214,138,.2)', color: 'var(--success)', borderRadius: 7, padding: '4px 10px', fontSize: 12 }}>
+                  {v}<button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 13, padding: 0, lineHeight: 1 }} onClick={() => removeVacc(i)}>×</button>
+                </span>))}
+              {medInfo.vaccinations.length === 0 && <div style={{ color: 'var(--muted)', fontSize: 13 }}>No vaccinations recorded</div>}
+            </div>
+            <div className="tag-input-row">
+              <input className="form-input" placeholder="e.g. COVID-19, Flu 2024…" value={newVacc} onChange={e => setNewVacc(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addVacc()} style={{ flex: 1 }} />
+              <button className="btn-accent" onClick={addVacc}>{t('add')}</button>
+            </div>
+          </div>
+
+          {/* Emergency Contact */}
+          <div className="emergency-card">
+            <div className="emergency-card-title">🆘 {t('emergencyContact')}</div>
+            <div className="form-row3" style={{ gap: 10 }}>
+              {[
+                { label: 'Name', key: 'name', placeholder: 'Contact name' },
+                { label: 'Phone', key: 'phone', placeholder: '+91 98765 43210' },
+                { label: 'Relation', key: 'relation', placeholder: 'e.g. Spouse' },
+              ].map(f => (
+                <div key={f.key}>
+                  <label className="form-label">{f.label}</label>
+                  <input className="form-input" placeholder={f.placeholder} value={ecForm[f.key] || ''} onChange={e => setEcForm(p => ({ ...p, [f.key]: e.target.value }))} />
+                </div>))}
+            </div>
+            <div className="btn-row">
+              <button className="btn-accent" onClick={saveEC}>&#x1F4BE; {t('saveGenerateQR')}</button>
+              {medInfo.emergencyContact?.name && (
+                <button className="btn-ghost" onClick={() => setShowQR(true)}>🔍 {t('viewQR')}</button>
+              )}
+            </div>
+          </div>
+          {showQR && <QRModal user={user} ecForm={ecForm} store={store} onClose={() => setShowQR(false)} />}
+        </>}
+
+        {/* ── SETTINGS TAB ── */}
+        {activeTab === 'settings' && <>
+          {/* Notifications */}
+          <div className="settings-group">
+            <div className="settings-group-title">🔔 {t('notifications')}</div>
+            {[
+              { key: 'emailReminders', label: t('emailReminders'), desc: 'Send medicine reminders to your email' },
+              { key: 'smsReminders', label: t('smsReminders'), desc: 'Send reminders via SMS' },
+              { key: 'pushNotifications', label: t('pushNotifications'), desc: 'Browser push notifications' },
+            ].map(s => (
+              <div key={s.key} className="settings-row">
+                <div><div className="settings-label">{s.label}</div><div className="settings-desc">{s.desc}</div></div>
+                <button className={`toggle ${sett[s.key] ? 'on' : ''}`} onClick={() => stgl(s.key)} />
+              </div>))}
+            <div className="settings-row">
+              <div><div className="settings-label">{t('reminderAdvance')}</div><div className="settings-desc">How early to send reminders</div></div>
+              <select className="settings-select" value={sett.reminderAdvance} onChange={e => sset('reminderAdvance', e.target.value)}>
+                {['5min', '10min', '15min', '30min', '1hr'].map(v => <option key={v}>{v}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Preferences */}
+          <div className="settings-group">
+            <div className="settings-group-title">🎨 {t('preferences')}</div>
+            <div className="settings-row">
+              <div><div className="settings-label">{t('language')}</div><div className="settings-desc">App display language</div></div>
+              <select className="settings-select" value={sett.language} onChange={e => sset('language', e.target.value)}>
+                {['English', 'Hindi', 'Telugu'].sort().map(v => <option key={v}>{v}</option>)}
+              </select>
+            </div>
+
+            <div className="settings-row">
+              <div><div className="settings-label">{t('units')}</div><div className="settings-desc">Units for height, weight, temperature</div></div>
+              <select className="settings-select" value={sett.units} onChange={e => sset('units', e.target.value)}>
+                <option value="metric">{t('metric')}</option>
+                <option value="imperial">{t('imperial')}</option>
+              </select>
+            </div>
+            <div className="btn-row" style={{ marginTop: 20 }}>
+              <button className="btn-accent" style={{ width: '100%', justifyContent: 'center' }} onClick={saveSettings}>
+                💾 {t('save')}
+              </button>
+            </div>
+          </div>
+
+          {/* Privacy */}
+          <div className="settings-group">
+            <div className="settings-group-title">🔒 {t('privacySecurity')}</div>
+            <div className="settings-row" style={{ marginTop: 10 }}>
+              <button className="btn-danger action-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={(e) => {
+                setTimeout(() => {
+                  if (confirm('Clear all local data?')) { localStorage.clear(); location.reload(); }
+                }, 100);
+              }}>
+                🗑️ {t('clearData')}
+              </button>
+            </div>
+            <div className="settings-row" style={{ marginTop: 0 }}>
+              <button className="btn-ghost" style={{ width: '100%', justifyContent: 'center', color: 'var(--danger)' }} onClick={onLogout}>
+                ⏻ {t('signOut')}
+              </button>
+            </div>
+          </div>
+        </>}
+      </>;
+    }
+
+    // ═══════════════════════════════════════════
+    //  APP ROOT
+    // ═══════════════════════════════════════════
+    const NAV = [
+      { id: 'dashboard', icon: '⬡', label: 'Dashboard' },
+      { id: 'medicines', icon: '💊', label: 'Medicines' },
+      { id: 'reminders', icon: '🔔', label: 'Reminders' },
+      { id: 'diseases', icon: '🩺', label: 'Conditions' },
+      { id: 'reports', icon: '📋', label: 'Reports' },
+    ];
+
+    function App() {
+      const [welcomed, setWelcomed] = React.useState(() => LS.get('welcomed', false));
+      const [user, setUser] = React.useState(() => LS.get('session', null));
+      const [page, setPage] = React.useState('dashboard');
+      const [store, setStore] = React.useState(() => LS.get('session', null) ? loadStore(LS.get('session').email) : null);
+      const { toasts, toast } = useToast();
+
+      const t = (key) => {
+        const lang = store?.settings?.language || 'English';
+        return TRANSLATIONS[lang]?.[key] || TRANSLATIONS.English[key] || key;
+      };
+
+      const login = (u, profStore) => {
+        setUser(u);
+        if (profStore) {
+          profStore.medicines = [];
+          profStore.reminders = [];
+          profStore.reports = [];
+          profStore.nextId = 1;
+          setStore(profStore);
+        } else {
+          setStore(loadStore(u.email));
+        }
+        setPage('dashboard');
+      };
+      const logout = () => { LS.del('session'); localStorage.removeItem('access_token'); setUser(null); setStore(null); };
+
+      const handleSave = (updated) => { setStore(updated); persistStore(user.email, updated); };
+
+      const handleUserUpdate = (u) => { setUser(u); };
+
+      // Global click listener for voice feedback
+      React.useEffect(() => {
+        let isVoiceEnabled = store?.settings?.voiceEnabled;
+        if (isVoiceEnabled === undefined) isVoiceEnabled = LS.get('voice_enabled', false);
+        if (!isVoiceEnabled) return;
+
+        const currentLang = store?.settings?.language || LS.get('temp_lang', 'English');
+        const MAP = { 'English': 'en-US', 'Hindi': 'hi-IN', 'Telugu': 'te-IN', 'Spanish': 'es-ES', 'Arabic': 'ar-SA' };
+
+        const speakText = (text) => {
+          if (!text) return;
+          text = text.replace(/[^\w\s\u0900-\u097F\u0C00-\u0C7F\u00C0-\u00FF]/g, '').trim();
+
+
+          if (text) {
+            const synth = window.speechSynthesis;
+            synth.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            const code = MAP[currentLang] || 'en-US';
+            u.lang = code;
+
+            const voiceName = store?.settings?.voiceName || LS.get('voice_name', '');
+            const voices = window.speechSynthesis.getVoices();
+            let voice = voices.find(v => v.name === voiceName);
+            if (!voice) voice = getBestVoice(code);
+            if (voice) u.voice = voice;
+
+            synth.speak(u);
+          }
+        };
+
+        const handleClick = (e) => {
+          // Find closest clickable element (button, a, nav-item, tab, etc)
+          const el = e.target.closest('button, a, .nav-item, .tab-btn, .action-btn, .sb-profile, .card-btn, .logout-row, .toggle');
+          if (!el) return;
+          let text = el.innerText || el.textContent || el.title; // fallback to title for icon buttons
+          speakText(text);
+        };
+
+        const handleFocus = (e) => {
+          const el = e.target;
+          if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') {
+            let text = el.placeholder || el.name;
+            // Try to find the associated label or previous sibling text
+            if (el.closest('div')) {
+              const label = el.closest('div').querySelector('.form-label, .info-field-label');
+              if (label) text = label.innerText;
+              else {
+                const siblingLabel = el.previousElementSibling;
+                if (siblingLabel && (siblingLabel.tagName === 'LABEL' || siblingLabel.className.includes('label'))) {
+                  text = siblingLabel.innerText;
+                }
+              }
+            }
+            speakText(text);
+          }
+        };
+
+        document.addEventListener('click', handleClick);
+        document.addEventListener('focusin', handleFocus);
+        return () => {
+          document.removeEventListener('click', handleClick);
+          document.removeEventListener('focusin', handleFocus);
+        };
+      }, [welcomed, user, store?.settings?.language]);
+
+      if (!welcomed) return <WelcomeOverlay onDone={(lang, voiceEnabled, voiceName) => {
+        LS.set('welcomed', true);
+        LS.set('temp_lang', lang);
+        LS.set('voice_enabled', voiceEnabled);
+        LS.set('voice_name', voiceName);
+        setWelcomed(true);
+      }} />;
+
+      if (!user) return <><AuthPage onLogin={login} /><ToastContainer toasts={toasts} /></>;
+
+      const pending = store.reminders.filter(r => r.status === 'pending').length;
+      const props = { store, onSave: handleSave, toast, user, setUser: handleUserUpdate, onLogout: logout, t };
+
+      const pages = {
+        dashboard: <DashboardPage {...props} />,
+        medicines: <MedicinesPage {...props} />,
+        reminders: <RemindersPage {...props} />,
+        diseases: <DiseasesPage  {...props} />,
+        reports: <ReportsPage   {...props} />,
+        profile: <ProfilePage   {...props} />,
+      };
+
+      return (
+        <div className="app-shell">
+          <aside className="sidebar">
+            <div className="sidebar-top">
+              <div className="sidebar-logo">✦ Health<span>Vault</span></div>
+              {/* Profile card */}
+              <div className="sb-profile" onClick={() => setPage('profile')}>
+                <div className="sb-badge" />
+                <div className="sb-profile-row">
+                  <div className="sb-avatar">
+                    {user.photo ? <img src={user.photo} alt="avatar" /> : user.name?.[0]?.toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="sb-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</div>
+                    <div className="sb-meta">🩸 {user.blood_group} · {user.age}{t('age')[0].toLowerCase()} · {user.gender}</div>
+                  </div>
+                  <span style={{ color: 'var(--muted)', fontSize: 12 }}>›</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="nav-scroll">
+              <div className="nav-label">Main Menu</div>
+              {NAV.map(n => (
+                <div key={n.id} className={`nav-item ${page === n.id ? 'active' : ''}`} onClick={() => setPage(n.id)}>
+                  <span className="nav-icon">{n.icon}</span>
+                  {t(n.id)}
+                  {n.id === 'reminders' && pending > 0 && <span className="nav-badge">{pending}</span>}
+                </div>))}
+
+              <div className="nav-label">Account</div>
+              <div className={`nav-item ${page === 'profile' ? 'active' : ''}`} onClick={() => setPage('profile')}>
+                <span className="nav-icon">👤</span>{t('profileSettings')}
+              </div>
+            </div>
+
+            <div className="sidebar-foot">
+              <div className="logout-row" onClick={logout}>
+                <span style={{ fontSize: 16 }}>⏻</span>{t('signOut')}
+              </div>
+            </div>
+          </aside>
+
+          <main className="main-content">{pages[page] || pages.dashboard}</main>
+          <ToastContainer toasts={toasts} />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+
+</html>

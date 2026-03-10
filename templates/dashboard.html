@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - HealthVault AI{% endblock %}
+
+{% block header_actions %}
+<button id="logout-btn" class="btn btn-danger"
+    style="background: transparent; border: 1px solid var(--danger); box-shadow: none;">Logout</button>
+{% endblock %}
+
+{% block content %}
+<div class="container" id="dashboard-app">
+
+    <div class="dashboard-grid">
+        <!-- AI Health Records Section -->
+        <div class="panel glass-panel">
+            <h3>Health Records & AI Analysis</h3>
+            <form id="record-form" class="mb-4">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Heart Rate (bpm)</label>
+                        <input type="number" id="hr" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>BP Systolic (mmHg)</label>
+                        <input type="number" id="bp_sys" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>BP Diastolic (mmHg)</label>
+                        <input type="number" id="bp_dia" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Blood Sugar (mg/dL)</label>
+                        <input type="number" step="0.1" id="sugar" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Temp (°C)</label>
+                        <input type="number" step="0.1" id="temp" class="form-control" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Analyze & Save Vitals</button>
+            </form>
+
+            <div style="margin-top: 2rem;">
+                <h4>Recent Records</h4>
+                <ul id="records-list" class="data-list" style="margin-top: 1rem; max-height: 400px; overflow-y: auto;">
+                    <!-- JS fills this -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right Column (Medications + Emergency) -->
+        <div>
+            <!-- Medications Section -->
+            <div class="panel glass-panel">
+                <h3>Medication Manager</h3>
+                <form id="med-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Medication Name</label>
+                        <input type="text" id="med-name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Dosage</label>
+                        <input type="text" id="med-dosage" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Frequency (e.g. Daily)</label>
+                        <input type="text" id="med-freq" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Time To Take</label>
+                        <input type="time" id="med-time" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="grid-column: span 2;">Add Medication</button>
+                </form>
+
+                <ul id="medications-list" class="data-list"
+                    style="margin-top: 2rem; max-height: 300px; overflow-y: auto;">
+                    <!-- JS fills this -->
+                </ul>
+            </div>
+
+            <!-- Emergency Trigger -->
+            <div class="panel glass-panel emergency-btn-container">
+                <h3>Emergency Alert System</h3>
+                <p class="text-secondary" style="margin-bottom: 2rem; font-size: 0.875rem;">
+                    One-click emergency trigger. Instantly notifies contacts and begins live location broadcast.
+                </p>
+                <div class="radar-glow"></div>
+                <button id="emergency-btn" class="btn btn-danger btn-emergency">
+                    SOS
+                </button>
+                <div id="emergency-status"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

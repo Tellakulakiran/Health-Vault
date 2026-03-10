@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}Login - HealthVault AI{% endblock %}
+
+{% block content %}
+<div class="container login-wrapper" style="height: calc(100vh - 100px);">
+    <div class="glass-panel login-card">
+        <h2>Welcome Back</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required value="patient_demo">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required value="password123">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Secure Login</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

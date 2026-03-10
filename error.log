@@ -1,0 +1,619 @@
+﻿python : C:\Users\tella\App
+Data\Local\Programs\Python\
+Python313\Lib\site-packages
+\pydantic\_internal\_config
+.py:383: UserWarning: 
+Valid config keys have 
+changed in V2:
+At line:1 char:1
++ python main.py 2>&1 | 
+Out-File -FilePath 
+error.log -Encoding utf8
++ ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecifi    ed: 
+(C:\Users\tell    a\... 
+changed in V    2::String) 
+[], Rem    oteException
+    + FullyQualifiedEr    
+rorId : NativeComm    
+andError
+ 
+* 'orm_mode' has been 
+renamed to 
+'from_attributes'
+  warnings.warn(message, 
+UserWarning)
+C:\Users\tella\Desktop\heal
+thvault\main.py:36: 
+DeprecationWarning: 
+        on_event is 
+deprecated, use lifespan 
+event handlers instead.
+
+        Read more about it 
+in the
+        [FastAPI docs for 
+Lifespan Events](https://fa
+stapi.tiangolo.com/advanced
+/events/).
+        
+  @app.on_event("startup")
+INFO:     Will watch for 
+changes in these 
+directories: ['C:\\Users\\t
+ella\\Desktop\\healthvault'
+]
+INFO:     Uvicorn running 
+on http://0.0.0.0:8000 
+(Press CTRL+C to quit)
+INFO:     Started reloader 
+process [33340] using 
+WatchFiles
+C:\Users\tella\AppData\Loca
+l\Programs\Python\Python313
+\Lib\site-packages\pydantic
+\_internal\_config.py:383: 
+UserWarning: Valid config 
+keys have changed in V2:
+* 'orm_mode' has been 
+renamed to 
+'from_attributes'
+  warnings.warn(message, 
+UserWarning)
+INFO:     Started server 
+process [21020]
+INFO:     Waiting for 
+application startup.
+ERROR:    Traceback (most 
+recent call last):
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\engine\base.py",
+ line 1967, in 
+_exec_single_context
+    
+self.dialect.do_execute(
+    
+~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, 
+str_statement, 
+effective_parameters, 
+context
+        ^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^
+    )
+    ^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\engine\default.p
+y", line 952, in do_execute
+    
+cursor.execute(statement, 
+parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^
+^^^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\dialects\sqlite\
+aiosqlite.py", line 182, 
+in execute
+    self._adapt_connection.
+_handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\dialects\sqlite\
+aiosqlite.py", line 342, 
+in _handle_exception
+    raise error
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\dialects\sqlite\
+aiosqlite.py", line 164, 
+in execute
+    self.await_(_cursor.exe
+cute(operation, 
+parameters))
+    ~~~~~~~~~~~^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\util\_concurrenc
+y_py3k.py", line 132, in 
+await_only
+    return current.parent.s
+witch(awaitable)  # type: i
+gnore[no-any-return,attr-de
+fined] # noqa: E501
+           ~~~~~~~~~~~~~~~~
+~~~~~^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\util\_concurrenc
+y_py3k.py", line 196, in 
+greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+aiosqlite\cursor.py", line 
+40, in execute
+    await self._execute(sel
+f._cursor.execute, sql, 
+parameters)
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+aiosqlite\cursor.py", line 
+32, in _execute
+    return await 
+self._conn._execute(fn, 
+*args, **kwargs)
+           ^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+aiosqlite\core.py", line 
+160, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+aiosqlite\core.py", line 
+63, in 
+_connection_worker_thread
+    result = function()
+sqlite3.OperationalError: 
+no such column: users.name
+
+The above exception was 
+the direct cause of the 
+following exception:
+
+Traceback (most recent 
+call last):
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+starlette\routing.py", 
+line 694, in lifespan
+    async with 
+self.lifespan_context(app) 
+as maybe_state:
+               
+~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\contextlib.py"
+, line 214, in __aenter__
+    return await 
+anext(self.gen)
+           
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+fastapi\routing.py", line 
+211, in merged_lifespan
+    async with 
+original_context(app) as 
+maybe_original_state:
+               
+~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\contextlib.py"
+, line 214, in __aenter__
+    return await 
+anext(self.gen)
+           
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+fastapi\routing.py", line 
+211, in merged_lifespan
+    async with 
+original_context(app) as 
+maybe_original_state:
+               
+~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\contextlib.py"
+, line 214, in __aenter__
+    return await 
+anext(self.gen)
+           
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+fastapi\routing.py", line 
+211, in merged_lifespan
+    async with 
+original_context(app) as 
+maybe_original_state:
+               
+~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\contextlib.py"
+, line 214, in __aenter__
+    return await 
+anext(self.gen)
+           
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+fastapi\routing.py", line 
+211, in merged_lifespan
+    async with 
+original_context(app) as 
+maybe_original_state:
+               
+~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\contextlib.py"
+, line 214, in __aenter__
+    return await 
+anext(self.gen)
+           
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+fastapi\routing.py", line 
+211, in merged_lifespan
+    async with 
+original_context(app) as 
+maybe_original_state:
+               
+~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\contextlib.py"
+, line 214, in __aenter__
+    return await 
+anext(self.gen)
+           
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+fastapi\routing.py", line 
+211, in merged_lifespan
+    async with 
+original_context(app) as 
+maybe_original_state:
+               
+~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+starlette\routing.py", 
+line 571, in __aenter__
+    await 
+self._router.startup()
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+starlette\routing.py", 
+line 671, in startup
+    await handler()
+  File "C:\Users\tella\Desk
+top\healthvault\main.py", 
+line 43, in startup_event
+    result = await session.
+execute(select(User).where(
+User.username == 
+"patient_demo"))
+             ^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\ext\asyncio\sess
+ion.py", line 449, in 
+execute
+    result = await 
+greenlet_spawn(
+             
+^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\util\_concurrenc
+y_py3k.py", line 201, in 
+greenlet_spawn
+    result = context.throw(
+*sys.exc_info())
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\orm\session.py",
+ line 2351, in execute
+    return 
+self._execute_internal(
+           
+~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        
+_add_event=_add_event,
+        
+^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\orm\session.py",
+ line 2249, in 
+_execute_internal
+    result: Result[Any] = c
+ompile_state_cls.orm_execut
+e_statement(
+                          ~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\orm\context.py",
+ line 306, in 
+orm_execute_statement
+    result = conn.execute(
+        statement, params 
+or {}, execution_options=ex
+ecution_options
+    )
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\engine\base.py",
+ line 1419, in execute
+    return meth(
+        self,
+        
+distilled_parameters,
+        execution_options 
+or NO_OPTIONS,
+    )
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\sql\elements.py"
+, line 527, in 
+_execute_on_connection
+    return connection._exec
+ute_clauseelement(
+           ~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~^
+        self, 
+distilled_params, 
+execution_options
+        ^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\engine\base.py",
+ line 1641, in 
+_execute_clauseelement
+    ret = 
+self._execute_context(
+        dialect,
+    ...<8 lines>...
+        
+cache_hit=cache_hit,
+    )
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\engine\base.py",
+ line 1846, in 
+_execute_context
+    return 
+self._exec_single_context(
+           
+~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, 
+statement, parameters
+        ^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\engine\base.py",
+ line 1986, in 
+_exec_single_context
+    self._handle_dbapi_exce
+ption(
+    ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~^
+        e, str_statement, 
+effective_parameters, 
+cursor, context
+        ^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
+    )
+    ^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\engine\base.py",
+ line 2363, in 
+_handle_dbapi_exception
+    raise sqlalchemy_except
+ion.with_traceback(exc_info
+[2]) from e
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\engine\base.py",
+ line 1967, in 
+_exec_single_context
+    
+self.dialect.do_execute(
+    
+~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, 
+str_statement, 
+effective_parameters, 
+context
+        ^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^
+    )
+    ^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\engine\default.p
+y", line 952, in do_execute
+    
+cursor.execute(statement, 
+parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^
+^^^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\dialects\sqlite\
+aiosqlite.py", line 182, 
+in execute
+    self._adapt_connection.
+_handle_exception(error)
+    ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\dialects\sqlite\
+aiosqlite.py", line 342, 
+in _handle_exception
+    raise error
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\dialects\sqlite\
+aiosqlite.py", line 164, 
+in execute
+    self.await_(_cursor.exe
+cute(operation, 
+parameters))
+    ~~~~~~~~~~~^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\util\_concurrenc
+y_py3k.py", line 132, in 
+await_only
+    return current.parent.s
+witch(awaitable)  # type: i
+gnore[no-any-return,attr-de
+fined] # noqa: E501
+           ~~~~~~~~~~~~~~~~
+~~~~~^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+sqlalchemy\util\_concurrenc
+y_py3k.py", line 196, in 
+greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+aiosqlite\cursor.py", line 
+40, in execute
+    await self._execute(sel
+f._cursor.execute, sql, 
+parameters)
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+aiosqlite\cursor.py", line 
+32, in _execute
+    return await 
+self._conn._execute(fn, 
+*args, **kwargs)
+           ^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+aiosqlite\core.py", line 
+160, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\tella\AppD
+ata\Local\Programs\Python\P
+ython313\Lib\site-packages\
+aiosqlite\core.py", line 
+63, in 
+_connection_worker_thread
+    result = function()
+sqlalchemy.exc.OperationalE
+rror: 
+(sqlite3.OperationalError) 
+no such column: users.name
+[SQL: SELECT users.id, 
+users.username, 
+users.hashed_password, 
+users.name, users.email, 
+users.phone, users.age, 
+users.gender, 
+users.blood_group, 
+users.role, 
+users.is_active 
+FROM users 
+WHERE users.username = ?]
+[parameters: 
+('patient_demo',)]
+(Background on this error 
+at: https://sqlalche.me/e/2
+0/e3q8)
+
+ERROR:    Application 
+startup failed. Exiting.
