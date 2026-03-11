@@ -9,7 +9,7 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.database import engine, Base, get_db, AsyncSessionLocal
+from core.database import get_db, AsyncSessionLocal
 from core.security import get_password_hash
 from models.user import User
 import models.health
@@ -55,18 +55,6 @@ app.include_router(user_profile.router, prefix="/api/profile", tags=["profile"])
 #             )
 #             session.add(demo_user)
 #             await session.commit()
-
-@app.get("/api/reset_db_dangerous")
-async def reset_db_cloud():
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-            await conn.run_sync(Base.metadata.create_all)
-        return {"msg": "Cloud Database Schema successfully synchronized!"}
-    except Exception as e:
-        import traceback
-        return {"error": str(e), "trace": traceback.format_exc()}
-
 # Frontend Routes
 @app.get("/", response_class=HTMLResponse)
 async def read_dashboard(request: Request):

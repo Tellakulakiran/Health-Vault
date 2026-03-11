@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "C:\Users\tella\Desktop\healthvault\test_crash.py", line 10, in <module>
+    import api.index
+  File "C:\Users\tella\Desktop\healthvault\api\index.py", line 12, in <module>
+    from core.database import get_db, AsyncSessionLocal
+ImportError: cannot import name 'AsyncSessionLocal' from 'core.database' (C:\Users\tella\Desktop\healthvault\core\database.py)
