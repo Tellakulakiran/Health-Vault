@@ -56,6 +56,13 @@ app.include_router(user_profile.router, prefix="/api/profile", tags=["profile"])
 #             session.add(demo_user)
 #             await session.commit()
 
+@app.get("/api/reset_db_dangerous")
+async def reset_db_cloud():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    return {"msg": "Cloud Database Schema successfully synchronized!"}
+
 # Frontend Routes
 @app.get("/", response_class=HTMLResponse)
 async def read_dashboard(request: Request):
