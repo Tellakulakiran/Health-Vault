@@ -48,12 +48,15 @@ async def register_user(
     await db.commit()
     await db.refresh(new_user)
     
+    # Capture the ID before the next commit expires the new_user object
+    user_id = new_user.id
+    
     # Initialize basic settings
     from models.health import UserSetting
-    db.add(UserSetting(user_id=new_user.id))
+    db.add(UserSetting(user_id=user_id))
     await db.commit()
     
-    return {"msg": "Registration successful", "user_id": new_user.id}
+    return {"msg": "Registration successful", "user_id": user_id}
 
 @router.post("/token")
 async def login_for_access_token(
