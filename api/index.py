@@ -58,10 +58,14 @@ app.include_router(user_profile.router, prefix="/api/profile", tags=["profile"])
 
 @app.get("/api/reset_db_dangerous")
 async def reset_db_cloud():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
-    return {"msg": "Cloud Database Schema successfully synchronized!"}
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+            await conn.run_sync(Base.metadata.create_all)
+        return {"msg": "Cloud Database Schema successfully synchronized!"}
+    except Exception as e:
+        import traceback
+        return {"error": str(e), "trace": traceback.format_exc()}
 
 # Frontend Routes
 @app.get("/", response_class=HTMLResponse)
