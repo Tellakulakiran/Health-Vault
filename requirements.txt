@@ -9,3 +9,6 @@ python-multipart
 asyncpg
 python-dotenv
 pydantic-settings
+
+supabase
+httpx
