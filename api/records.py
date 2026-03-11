@@ -7,7 +7,10 @@ from models.health import HealthRecord
 from models.user import User
 from schemas.health import HealthRecordCreate, HealthRecordResponse
 from api.deps import get_current_active_user
-from ai.engine import risk_analyzer
+# import sys
+# import os
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# from ai.engine import risk_analyzer
 
 router = APIRouter()
 
@@ -17,14 +20,9 @@ async def create_health_record(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    # 1. Analyze vitals using AI Engine
-    score, assessment = risk_analyzer.analyze_vitals(
-        hr=record_in.heart_rate,
-        bp_sys=record_in.blood_pressure_systolic,
-        bp_dia=record_in.blood_pressure_diastolic,
-        sugar=record_in.blood_sugar,
-        temp=record_in.body_temperature
-    )
+    # 1. Analyze vitals using AI Engine (Disabled due to Vercel module pathing bug)
+    # score, assessment = risk_analyzer.analyze_vitals(...)
+    score, assessment = 0, "AI Analysis offline"
 
     # 2. Save record
     db_record = HealthRecord(
