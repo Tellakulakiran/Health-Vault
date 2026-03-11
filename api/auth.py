@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from datetime import timedelta
 from core.database import get_db
-from core.security import verify_password, create_access_token
+from core.security import verify_password, create_access_token, get_password_hash
 from core.config import settings
 from models.user import User
 
