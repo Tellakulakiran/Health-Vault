@@ -6,6 +6,8 @@ from core.config import settings
 import uuid
 from sqlalchemy.orm import declarative_base
 
+from fastapi import HTTPException
+
 # Required for all data models like models/user.py to inherit from
 Base = declarative_base()
 
@@ -18,9 +20,9 @@ _supabase_client = None
 def get_supabase_client() -> Client:
     global _supabase_client
     if _supabase_client is None:
-        url = settings.SUPABASE_URL or "https://aqjcsrmkxjtihbryxeyk.supabase.co"
+        url = (settings.SUPABASE_URL or "https://aqjcsrmkxjtihbryxeyk.supabase.co").strip()
         # Provide a dummy string during build time to avoid "supabase_key is required" exception
-        key = settings.SUPABASE_KEY or "dummy_build_key" 
+        key = (settings.SUPABASE_KEY or "dummy_build_key").strip()
         _supabase_client = create_client(url, key)
     return _supabase_client
 
@@ -54,21 +56,45 @@ class SupabaseSession:
         self.pending_adds.append(instance)
 
     async def commit(self):
-        for item in self.pending_adds:
-            table_name = item.__tablename__
-            
-            # Convert SQLAlchemy object to dictionary, excluding internal state
-            data = {c.name: getattr(item, c.name) for c in item.__table__.columns if getattr(item, c.name) is not None}
-            
-            # Post to Supabase REST endpoint
-            client = get_supabase_client()
-            response = client.table(table_name).insert(data).execute()
-            
-            # Emulate SQLAlchemy ID assignment
-            if response.data and 'id' in response.data[0]:
-                setattr(item, 'id', response.data[0]['id'])
+        try:
+            for item in self.pending_adds:
+                table_name = item.__tablename__
+                
+                # Use only actual table column names to filter the object's data
+                # This prevents SQLAlchemy internal attributes or missing columns from causing Supabase REST errors
+                valid_columns = {c.name for c in item.__table__.columns}
+                data = {}
+                for col in valid_columns:
+                    val = getattr(item, col, None)
+                    if val is not None:
+                        data[col] = val
+                
+                # Post to Supabase REST endpoint
+                client = get_supabase_client()
+                try:
+                    response = client.table(table_name).insert(data).execute()
+                except Exception as inner_e:
+                    # Provide clearer error message for Postgrest API errors
+                    err_msg = str(inner_e)
+                    if "Invalid API key" in err_msg:
+                        err_msg = "Invalid Supabase API Key. Please check your dashboard and Vercel environment variables."
+                    elif "JWT" in err_msg:
+                        err_msg = "Supabase Auth Error (JWT). Check your SUPABASE_KEY."
+                        
+                    raise HTTPException(
+                        status_code=500, 
+                        detail=f"Supabase REST Insert Failure on table '{table_name}': {err_msg}"
+                    )
+                
+                # Emulate SQLAlchemy ID assignment
+                if response.data and 'id' in response.data[0]:
+                    setattr(item, 'id', response.data[0]['id'])
 
-        self.pending_adds = []
+            self.pending_adds = []
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Unexpected Supabase Session Error (Commit): {str(e)}")
         
     async def refresh(self, instance):
         pass
@@ -78,34 +104,43 @@ class SupabaseSession:
         Parses basic SQLAlchemy `select(Model).where(Model.field == value)` statements
         and converts them into Supabase `.select().eq()` REST requests.
         """
-        table_name = statement.froms[0].name
-        model_class = statement.column_descriptions[0]["type"]
-        
-        client = get_supabase_client()
-        query = client.table(table_name).select("*")
-        
-        # Extremely simplified WHERE clause parser for our specific Auth/Profile queries
-        if statement.whereclause is not None:
-            # Check for OR conditions (used in login/register)
-            if hasattr(statement.whereclause, 'operator') and statement.whereclause.operator.__name__ == 'or_':
-                clauses = statement.whereclause.clauses
-                or_string = ",".join([f"{c.left.name}.eq.{c.right.value}" for c in clauses])
-                query = query.or_(or_string)
-            else:
-                # Simple single condition
-                left_key = statement.whereclause.left.name
-                right_val = statement.whereclause.right.value
-                query = query.eq(left_key, right_val)
-                
-        response = query.execute()
-        
-        # Re-hydrate dictionary data back into SQLAlchemy Model instances
-        hydrated = []
-        for row in response.data:
-            instance = model_class(**row)
-            hydrated.append(instance)
+        try:
+            table_name = statement.froms[0].name
+            model_class = statement.column_descriptions[0]["type"]
             
-        return MockResult(hydrated)
+            client = get_supabase_client()
+            query = client.table(table_name).select("*")
+            
+            # Extremely simplified WHERE clause parser for our specific Auth/Profile queries
+            if statement.whereclause is not None:
+                # Check for OR conditions (used in login/register)
+                if hasattr(statement.whereclause, 'operator') and statement.whereclause.operator.__name__ == 'or_':
+                    clauses = statement.whereclause.clauses
+                    or_string = ",".join([f"{c.left.name}.eq.{c.right.value}" for c in clauses])
+                    query = query.or_(or_string)
+                else:
+                    # Simple single condition
+                    left_key = statement.whereclause.left.name
+                    right_val = statement.whereclause.right.value
+                    query = query.eq(left_key, right_val)
+                    
+            response = query.execute()
+            
+            # Re-hydrate dictionary data back into SQLAlchemy Model instances
+            hydrated = []
+            for row in response.data:
+                instance = model_class(**row)
+                hydrated.append(instance)
+                
+            return MockResult(hydrated)
+        except Exception as e:
+            err_msg = str(e)
+            if "Invalid API key" in err_msg:
+                err_msg = "Invalid Supabase API Key. Please check your dashboard and Vercel environment variables."
+            elif "404" in err_msg:
+                err_msg = f"Table '{table_name}' not found or Schema mismatch."
+                
+            raise HTTPException(status_code=500, detail=f"Supabase Database Error (Execute): {err_msg}")
 
 async def get_db():
     async with SupabaseSession() as session:

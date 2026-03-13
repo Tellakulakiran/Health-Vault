@@ -2527,6 +2527,17 @@
     });
     const persistStore = (email, data) => LS.set(storeKey(email), data);
 
+    // Global helper to safely parse JSON or return a friendly error
+    const safeParseJson = async (res) => {
+      const ct = res.headers.get('content-type');
+      if (ct && ct.includes('application/json')) {
+        return await res.json();
+      }
+      const text = await res.text();
+      console.error('Non-JSON response:', text);
+      return { detail: 'Server returned an invalid format (likely an error page).' };
+    };
+
     // ═══════════════════════════════════════════
     //  AI / Risk
     // ═══════════════════════════════════════════
@@ -2897,7 +2908,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: form.email.toLowerCase() })
           });
-          const data = await res.json();
+          const data = await safeParseJson(res);
           if (!res.ok) throw new Error(data.detail || 'Failed to send OTP');
           showToast('📩 OTP sent to ' + form.email, 'ok');
         } catch (err) {
@@ -2975,7 +2986,7 @@
               headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
               body: fd
             });
-            const authData = await res.json();
+            const authData = await safeParseJson(res);
             if (!res.ok) throw new Error(authData.detail || 'Login failed');
 
             localStorage.setItem('access_token', authData.access_token);
@@ -2983,7 +2994,7 @@
             const prefRes = await fetch('/api/profile/', {
               headers: { 'Authorization': 'Bearer ' + authData.access_token }
             });
-            const profileData = await prefRes.json();
+            const profileData = await safeParseJson(prefRes);
             profileData.user.photo = null;
 
             // Persist raw session for compatibility with App.jsx legacy code
@@ -3012,7 +3023,7 @@
                 age: parseInt(form.age || 30), gender: form.gender, blood_group: form.blood_group
               })
             });
-            const regData = await regRes.json();
+            const regData = await safeParseJson(regRes);
             if (!regRes.ok) throw new Error(regData.detail || 'Registration failed');
 
             showToast('Account created successfully! Please sign in.', 'ok');
@@ -3037,7 +3048,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: (pendingAcc?.email || form.email || form.phone).toLowerCase(), code: entered })
           });
-          const data = await res.json();
+          const data = await safeParseJson(res);
           if (!res.ok) { setError(data.detail || t('invalidOtp')); setLoading(false); return; }
 
           if (step === 'otp-register' || step === 'otp-login') {
