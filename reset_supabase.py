@@ -4,7 +4,7 @@ from core.database import Base
 import models.user
 import models.health
 
-engine = create_async_engine('postgresql+asyncpg://postgres:QvkThMtgQ9aWZNNk@db.aqjcsrmkxjtihbryxeyk.supabase.co:5432/postgres', echo=False, future=True)
+engine = create_async_engine('postgresql+asyncpg://postgres:your_db_password_here@aws-0-ap-south-1.pooler.supabase.com:6543/postgres', echo=False, future=True)
 
 async def reset_cloud_database():
     print('Connecting to Vercel Supabase Instance...')

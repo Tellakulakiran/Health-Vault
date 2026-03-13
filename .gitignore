@@ -30,3 +30,6 @@ generate_ddl.py
 inspect_db.py
 test_*.py
 verify_fix.py
+reset_supabase.py
+reset_db.py
+
